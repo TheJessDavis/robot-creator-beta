@@ -8,8 +8,7 @@ import {
   Button,
   ModuleStatus,
   ColorPicker,
-  ToolsDecoration,
-  LightBulbs
+  ToolsDecoration
 } from './styles';
 import Robot3D from './components/Robot3D';
 
@@ -20,7 +19,7 @@ interface RobotParts {
   legs: number;
   color: string;
   accessories: {
-    hat: boolean;
+    hat: 'cowboy' | 'bonnet' | false;
     mustache: boolean;
     lipstick: boolean;
   };
@@ -28,18 +27,18 @@ interface RobotParts {
 
 // Predefined accessory combinations
 const ACCESSORY_PRESETS = [
-  { hat: false, mustache: false, lipstick: false }, // None
-  { hat: true, mustache: false, lipstick: false },  // Just hat
-  { hat: true, mustache: true, lipstick: false },   // Hat + mustache
-  { hat: false, mustache: true, lipstick: false },  // Just mustache
-  { hat: false, mustache: false, lipstick: true },  // Just lipstick
-  { hat: true, mustache: false, lipstick: true },   // Hat + lipstick
-  { hat: false, mustache: true, lipstick: true },   // Mustache + lipstick
-  { hat: true, mustache: true, lipstick: true },    // All accessories
+  { hat: false, mustache: false, lipstick: false },     // None
+  { hat: 'cowboy', mustache: false, lipstick: false },  // Just cowboy hat
+  { hat: 'bonnet', mustache: false, lipstick: false },  // Just bonnet
+  { hat: 'cowboy', mustache: true, lipstick: false },   // Cowboy hat + mustache
+  { hat: false, mustache: true, lipstick: false },      // Just mustache
+  { hat: false, mustache: false, lipstick: true },      // Just lipstick
+  { hat: 'bonnet', mustache: false, lipstick: true },   // Bonnet + lipstick
+  { hat: 'cowboy', mustache: true, lipstick: true },    // Cowboy hat + mustache + lipstick
 ];
 
 const App: FC = () => {
-  const [robotParts, setRobotParts] = useState({
+  const [robotParts, setRobotParts] = useState<RobotParts>({
     color: '#88ccff',
     head: 1,
     body: 1,
@@ -68,7 +67,7 @@ const App: FC = () => {
     setAccessoryIndex(nextIndex);
     setRobotParts(prev => ({
       ...prev,
-      accessories: ACCESSORY_PRESETS[nextIndex]
+      accessories: ACCESSORY_PRESETS[nextIndex] as RobotParts['accessories']
     }));
   };
 
@@ -76,7 +75,8 @@ const App: FC = () => {
     const { hat, mustache, lipstick } = robotParts.accessories;
     if (!hat && !mustache && !lipstick) return "NO ACCESSORIES";
     const active = [];
-    if (hat) active.push("HAT");
+    if (hat === 'cowboy') active.push("COWBOY HAT");
+    if (hat === 'bonnet') active.push("BONNET");
     if (mustache) active.push("MUSTACHE");
     if (lipstick) active.push("LIPSTICK");
     return active.join(" + ");
@@ -93,11 +93,6 @@ const App: FC = () => {
 
         <RobotCanvas color={robotParts.color}>
           <ToolsDecoration />
-          <LightBulbs>
-            <div className="bulb" />
-            <div className="bulb" />
-            <div className="bulb" />
-          </LightBulbs>
           <Robot3D parts={robotParts} />
         </RobotCanvas>
 
@@ -131,7 +126,7 @@ const App: FC = () => {
             legs: randomPart(),
             color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
             accessories: ACCESSORY_PRESETS[randomAccessoryIndex]
-          });
+          } as RobotParts);
         }}>
           RANDOMIZE CONFIGURATION
         </Button>
