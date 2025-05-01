@@ -121,7 +121,7 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
     const blinkInterval = setInterval(() => {
       setIsBlinking(true);
       setTimeout(() => setIsBlinking(false), 200);
-    }, 3000);
+    }, 1500); // Changed from 3000 to 1500 for more frequent blinking
     return () => clearInterval(blinkInterval);
   }, []);
 
