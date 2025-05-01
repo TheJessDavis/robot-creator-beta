@@ -1,35 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Canvas, extend } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import React, { FC, useState, useEffect } from 'react';
 import * as THREE from 'three';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
+import { Accessories } from '.';
 
-// Extend JSX Elements with Three.js objects
-extend({
-  Mesh: THREE.Mesh,
-  BoxGeometry: THREE.BoxGeometry,
-  SphereGeometry: THREE.SphereGeometry,
-  CylinderGeometry: THREE.CylinderGeometry,
-  CircleGeometry: THREE.CircleGeometry,
-  TorusGeometry: THREE.TorusGeometry,
-  MeshStandardMaterial: THREE.MeshStandardMaterial,
-});
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      mesh: any;
-      boxGeometry: any;
-      sphereGeometry: any;
-      cylinderGeometry: any;
-      circleGeometry: any;
-      torusGeometry: any;
-      meshStandardMaterial: any;
-      group: any;
-    }
-  }
-}
-
-// Steampunk material presets
+// Material presets
 const brassFinish = {
   color: '#b5a642',
   metalness: 1,
@@ -54,8 +29,8 @@ const glassFinish = {
   opacity: 0.7,
 };
 
-interface RobotPartProps {
-  position?: [number, number, number];
+export interface RobotPartProps {
+  position?: THREE.Vector3 | [number, number, number];
   color: string;
   style: number;
   accessories?: {
@@ -64,51 +39,6 @@ interface RobotPartProps {
     lipstick?: boolean;
   };
 }
-
-const Accessories: React.FC<{ position: [number, number, number], accessories: RobotPartProps['accessories'] }> = 
-  ({ position, accessories }) => {
-  if (!accessories) return null;
-
-  return (
-    <group position={position}>
-      {/* Cowboy Hat */}
-      {accessories.hat && (
-        <group position={[0, 0.8, 0]}>
-          <mesh>
-            <cylinderGeometry args={[0.5, 0.7, 0.2, 8]} />
-            <meshStandardMaterial {...brassFinish} />
-          </mesh>
-          <mesh position={[0, -0.1, 0]}>
-            <cylinderGeometry args={[0.3, 0.3, 0.1, 8]} />
-            <meshStandardMaterial {...copperFinish} />
-          </mesh>
-        </group>
-      )}
-      {/* Mustache */}
-      {accessories.mustache && (
-        <group position={[0, -0.2, 0.4]}>
-          <mesh rotation={[0, 0, -0.2]}>
-            <boxGeometry args={[0.2, 0.05, 0.05]} />
-            <meshStandardMaterial {...brassFinish} />
-          </mesh>
-          <mesh rotation={[0, 0, 0.2]}>
-            <boxGeometry args={[0.2, 0.05, 0.05]} />
-            <meshStandardMaterial {...brassFinish} />
-          </mesh>
-        </group>
-      )}
-      {/* Lipstick */}
-      {accessories.lipstick && (
-        <group position={[0, -0.3, 0.4]}>
-          <mesh>
-            <boxGeometry args={[0.3, 0.05, 0.05]} />
-            <meshStandardMaterial color="#ff0000" metalness={0.8} roughness={0.2} />
-          </mesh>
-        </group>
-      )}
-    </group>
-  );
-};
 
 const Gear: React.FC<{ position: [number, number, number], scale?: number, rotation?: [number, number, number] }> = 
   ({ position, scale = 1, rotation = [0, 0, 0] }) => (
@@ -167,9 +97,9 @@ const Pipe: React.FC<{ start: [number, number, number], end: [number, number, nu
   );
 };
 
-const RobotHead: React.FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, accessories }) => {
-  const [expression, setExpression] = useState('neutral');
-  const [isBlinking, setIsBlinking] = useState(false);
+const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, accessories }) => {
+  const [expression, setExpression] = useState<string>('neutral');
+  const [isBlinking, setIsBlinking] = useState<boolean>(false);
 
   // Define materials
   const visorGlow = {
@@ -195,29 +125,76 @@ const RobotHead: React.FC<RobotPartProps> = ({ position = [0, 2, 0], color, styl
     return () => clearInterval(blinkInterval);
   }, []);
 
+  // Add expression cycling
+  useEffect(() => {
+    const expressions = ['neutral', 'happy', 'surprised', 'angry'];
+    let currentIndex = 0;
+    const expressionInterval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % expressions.length;
+      setExpression(expressions[currentIndex]);
+    }, 5000);
+    return () => clearInterval(expressionInterval);
+  }, []);
+
   const getEyeExpression = () => {
+    if (isBlinking) {
+      return {
+        scaleY: 0.1,
+        position: [0, 0, 0.32] as [number, number, number]
+      };
+    }
+
     switch (expression) {
       case 'happy':
-        return { scale: [1, 0.5, 1], rotation: [0, 0, 0] };
+        return {
+          scaleY: 0.5,
+          position: [0, 0.03, 0.32] as [number, number, number]
+        };
       case 'surprised':
-        return { scale: [1, 1.2, 1], rotation: [0, 0, 0] };
+        return {
+          scaleY: 1.2,
+          position: [0, 0, 0.32] as [number, number, number]
+        };
       case 'angry':
-        return { scale: [1, 0.3, 1], rotation: [0, 0, -0.2] };
+        return {
+          scaleY: 0.4,
+          rotation: Math.PI / 12,
+          position: [0, 0.03, 0.32] as [number, number, number]
+        };
       default:
-        return { scale: [1, 1, 1], rotation: [0, 0, 0] };
+        return {
+          scaleY: 1,
+          position: [0, 0, 0.32] as [number, number, number]
+        };
     }
   };
 
   const getMouthExpression = () => {
     switch (expression) {
       case 'happy':
-        return { scale: [1, 0.5, 1], rotation: [0, 0, 0] };
+        return {
+          scale: [0.4, 0.15, 1] as [number, number, number],
+          position: [0, -0.15, 0.32] as [number, number, number],
+          type: 'smile'
+        };
       case 'surprised':
-        return { scale: [1, 1.2, 1], rotation: [0, 0, 0] };
+        return {
+          scale: [0.2, 0.2, 1] as [number, number, number],
+          position: [0, -0.15, 0.32] as [number, number, number],
+          type: 'circle'
+        };
       case 'angry':
-        return { scale: [1, 0.3, 1], rotation: [0, 0, 0] };
+        return {
+          scale: [0.4, 0.1, 1] as [number, number, number],
+          position: [0, -0.15, 0.32] as [number, number, number],
+          type: 'frown'
+        };
       default:
-        return { scale: [1, 1, 1], rotation: [0, 0, 0] };
+        return {
+          scale: [0.3, 0.08, 1] as [number, number, number],
+          position: [0, -0.15, 0.32] as [number, number, number],
+          type: 'neutral'
+        };
     }
   };
 
@@ -239,6 +216,36 @@ const RobotHead: React.FC<RobotPartProps> = ({ position = [0, 2, 0], color, styl
         <cylinderGeometry args={[0.65, 0.45, 0.45, 32, 1, true]} />
         <meshStandardMaterial {...visorGlow} side={THREE.DoubleSide} transparent opacity={0.9} />
       </mesh>
+      {/* Enhanced Eyes behind visor */}
+      <group position={[0, 0.1, 0.3]} rotation={[0.3, 0, 0]}>
+        {/* Eye Glow Ring */}
+        <mesh position={[-0.25, 0, -0.01]}>
+          <torusGeometry args={[0.22, 0.02, 24, 24]} />
+          <meshStandardMaterial color="#88ccff" emissive="#88ccff" emissiveIntensity={1} />
+        </mesh>
+        <mesh position={[0.25, 0, -0.01]}>
+          <torusGeometry args={[0.22, 0.02, 24, 24]} />
+          <meshStandardMaterial color="#88ccff" emissive="#88ccff" emissiveIntensity={1} />
+        </mesh>
+        {/* Main Eyes */}
+        <mesh position={[-0.25, 0, 0]}>
+          <sphereGeometry args={[0.2, 32, 32]} />
+          <meshStandardMaterial color="#ffffff" emissive="#88ccff" emissiveIntensity={0.5} />
+        </mesh>
+        <mesh position={[0.25, 0, 0]}>
+          <sphereGeometry args={[0.2, 32, 32]} />
+          <meshStandardMaterial color="#ffffff" emissive="#88ccff" emissiveIntensity={0.5} />
+        </mesh>
+        {/* Eye Highlights */}
+        <mesh position={[-0.25, 0.08, 0.15]}>
+          <sphereGeometry args={[0.08, 16, 16]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+        <mesh position={[0.25, 0.08, 0.15]}>
+          <sphereGeometry args={[0.08, 16, 16]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+      </group>
       {/* Head Panel Lines */}
       {[-0.4, 0, 0.4].map((y) => (
         <mesh key={y} position={[0, y, 0]}>
@@ -266,21 +273,21 @@ const RobotHead: React.FC<RobotPartProps> = ({ position = [0, 2, 0], color, styl
         <sphereGeometry args={[0.7, 32, 32]} />
         <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
       </mesh>
-      {/* Large Expressive Eyes */}
+      {/* Larger Expressive Eyes */}
       <mesh position={[0.3, 0.1, 0.5]}>
-        <sphereGeometry args={[0.15, 16, 16]} />
+        <sphereGeometry args={[0.25, 24, 24]} />
         <meshStandardMaterial color="#ffffff" />
       </mesh>
-      <mesh position={[0.3, 0.1, 0.55]}>
-        <sphereGeometry args={[0.05, 16, 16]} />
+      <mesh position={[0.3, 0.1, 0.6]}>
+        <sphereGeometry args={[0.12, 24, 24]} />
         <meshStandardMaterial color="#000000" />
       </mesh>
       <mesh position={[-0.3, 0.1, 0.5]}>
-        <sphereGeometry args={[0.15, 16, 16]} />
+        <sphereGeometry args={[0.25, 24, 24]} />
         <meshStandardMaterial color="#ffffff" />
       </mesh>
-      <mesh position={[-0.3, 0.1, 0.55]}>
-        <sphereGeometry args={[0.05, 16, 16]} />
+      <mesh position={[-0.3, 0.1, 0.6]}>
+        <sphereGeometry args={[0.12, 24, 24]} />
         <meshStandardMaterial color="#000000" />
       </mesh>
       {/* Smiling Mouth */}
@@ -292,6 +299,55 @@ const RobotHead: React.FC<RobotPartProps> = ({ position = [0, 2, 0], color, styl
         <torusGeometry args={[0.2, 0.02, 8, 8]} />
         <meshStandardMaterial color="#000000" />
       </mesh>
+      {/* Enhanced Expressive Eyes */}
+      <group position={[0, 0, 0]}>
+        {/* Left Eye */}
+        <group position={[-0.3, 0.1, 0.5]}>
+          {/* Eye White */}
+          <mesh>
+            <sphereGeometry args={[0.25, 32, 32]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+          {/* Iris */}
+          <mesh position={[0, 0, 0.15]}>
+            <sphereGeometry args={[0.18, 32, 32]} />
+            <meshStandardMaterial color="#4488ff" metalness={0.5} roughness={0.2} />
+          </mesh>
+          {/* Pupil */}
+          <mesh position={[0, 0, 0.2]}>
+            <sphereGeometry args={[0.12, 24, 24]} />
+            <meshStandardMaterial color="#000000" />
+          </mesh>
+          {/* Highlight */}
+          <mesh position={[0.08, 0.08, 0.23]}>
+            <sphereGeometry args={[0.05, 16, 16]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+        </group>
+        {/* Right Eye */}
+        <group position={[0.3, 0.1, 0.5]}>
+          {/* Eye White */}
+          <mesh>
+            <sphereGeometry args={[0.25, 32, 32]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+          {/* Iris */}
+          <mesh position={[0, 0, 0.15]}>
+            <sphereGeometry args={[0.18, 32, 32]} />
+            <meshStandardMaterial color="#4488ff" metalness={0.5} roughness={0.2} />
+          </mesh>
+          {/* Pupil */}
+          <mesh position={[0, 0, 0.2]}>
+            <sphereGeometry args={[0.12, 24, 24]} />
+            <meshStandardMaterial color="#000000" />
+          </mesh>
+          {/* Highlight */}
+          <mesh position={[0.08, 0.08, 0.23]}>
+            <sphereGeometry args={[0.05, 16, 16]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+        </group>
+      </group>
       <Accessories position={[0, 0, 0]} accessories={accessories} />
     </group>,
     
@@ -301,13 +357,13 @@ const RobotHead: React.FC<RobotPartProps> = ({ position = [0, 2, 0], color, styl
         <sphereGeometry args={[0.7, 32, 32]} />
         <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
       </mesh>
-      {/* Goggle Eyes */}
+      {/* Larger Goggle Eyes */}
       <mesh position={[0.25, 0.1, 0.5]}>
-        <cylinderGeometry args={[0.15, 0.15, 0.1, 16]} />
+        <cylinderGeometry args={[0.25, 0.25, 0.15, 24]} />
         <meshStandardMaterial {...glassFinish} />
       </mesh>
       <mesh position={[-0.25, 0.1, 0.5]}>
-        <cylinderGeometry args={[0.15, 0.15, 0.1, 16]} />
+        <cylinderGeometry args={[0.25, 0.25, 0.15, 24]} />
         <meshStandardMaterial {...glassFinish} />
       </mesh>
       {/* Mechanical Nose */}
@@ -322,6 +378,67 @@ const RobotHead: React.FC<RobotPartProps> = ({ position = [0, 2, 0], color, styl
       </mesh>
       <Gear position={[0.4, 0.2, 0.4]} scale={0.3} />
       <Gear position={[-0.4, 0.2, 0.4]} scale={0.3} />
+      {/* Enhanced Goggle Eyes */}
+      <group position={[0, 0, 0]}>
+        {/* Left Eye */}
+        <group position={[-0.25, 0.1, 0.5]}>
+          {/* Goggle Frame */}
+          <mesh>
+            <cylinderGeometry args={[0.28, 0.28, 0.15, 32]} />
+            <meshStandardMaterial {...brassFinish} />
+          </mesh>
+          {/* Glass */}
+          <mesh position={[0, 0, 0.02]}>
+            <cylinderGeometry args={[0.25, 0.25, 0.15, 32]} />
+            <meshStandardMaterial {...glassFinish} />
+          </mesh>
+          {/* Inner Glow */}
+          <mesh position={[0, 0, 0.05]}>
+            <cylinderGeometry args={[0.2, 0.2, 0.01, 32]} />
+            <meshStandardMaterial color="#88ccff" emissive="#88ccff" emissiveIntensity={0.5} transparent opacity={0.5} />
+          </mesh>
+          {/* Decorative Rivets */}
+          {[0, Math.PI/2, Math.PI, Math.PI*3/2].map((angle) => (
+            <mesh key={angle} position={[
+              Math.cos(angle) * 0.28,
+              Math.sin(angle) * 0.28,
+              0
+            ]}>
+              <sphereGeometry args={[0.03, 8, 8]} />
+              <meshStandardMaterial {...copperFinish} />
+            </mesh>
+          ))}
+        </group>
+        {/* Right Eye */}
+        <group position={[0.25, 0.1, 0.5]}>
+          {/* Goggle Frame */}
+          <mesh>
+            <cylinderGeometry args={[0.28, 0.28, 0.15, 32]} />
+            <meshStandardMaterial {...brassFinish} />
+          </mesh>
+          {/* Glass */}
+          <mesh position={[0, 0, 0.02]}>
+            <cylinderGeometry args={[0.25, 0.25, 0.15, 32]} />
+            <meshStandardMaterial {...glassFinish} />
+          </mesh>
+          {/* Inner Glow */}
+          <mesh position={[0, 0, 0.05]}>
+            <cylinderGeometry args={[0.2, 0.2, 0.01, 32]} />
+            <meshStandardMaterial color="#88ccff" emissive="#88ccff" emissiveIntensity={0.5} transparent opacity={0.5} />
+          </mesh>
+          {/* Decorative Rivets */}
+          {[0, Math.PI/2, Math.PI, Math.PI*3/2].map((angle) => (
+            <mesh key={angle} position={[
+              Math.cos(angle) * 0.28,
+              Math.sin(angle) * 0.28,
+              0
+            ]}>
+              <sphereGeometry args={[0.03, 8, 8]} />
+              <meshStandardMaterial {...copperFinish} />
+            </mesh>
+          ))}
+        </group>
+      </group>
       <Accessories position={[0, 0, 0]} accessories={accessories} />
     </group>,
 
@@ -331,21 +448,21 @@ const RobotHead: React.FC<RobotPartProps> = ({ position = [0, 2, 0], color, styl
         <sphereGeometry args={[0.7, 32, 32]} />
         <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
       </mesh>
-      {/* Large Anime Eyes */}
+      {/* Larger Anime Eyes */}
       <mesh position={[0.3, 0.1, 0.5]}>
-        <sphereGeometry args={[0.2, 16, 16]} />
+        <sphereGeometry args={[0.3, 24, 24]} />
         <meshStandardMaterial color="#ffffff" />
       </mesh>
       <mesh position={[0.3, 0.1, 0.55]}>
-        <sphereGeometry args={[0.1, 16, 16]} />
+        <sphereGeometry args={[0.15, 24, 24]} />
         <meshStandardMaterial color="#000000" />
       </mesh>
       <mesh position={[-0.3, 0.1, 0.5]}>
-        <sphereGeometry args={[0.2, 16, 16]} />
+        <sphereGeometry args={[0.3, 24, 24]} />
         <meshStandardMaterial color="#ffffff" />
       </mesh>
       <mesh position={[-0.3, 0.1, 0.55]}>
-        <sphereGeometry args={[0.1, 16, 16]} />
+        <sphereGeometry args={[0.15, 24, 24]} />
         <meshStandardMaterial color="#000000" />
       </mesh>
       {/* Small Nose */}
@@ -358,6 +475,63 @@ const RobotHead: React.FC<RobotPartProps> = ({ position = [0, 2, 0], color, styl
         <torusGeometry args={[0.15, 0.02, 8, 8]} />
         <meshStandardMaterial color="#000000" />
       </mesh>
+      {/* Enhanced Anime Eyes */}
+      <group position={[0, 0, 0]}>
+        {/* Left Eye */}
+        <group position={[-0.3, 0.1, 0.5]}>
+          {/* Eye White */}
+          <mesh>
+            <sphereGeometry args={[0.3, 32, 32]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+          {/* Iris */}
+          <mesh position={[0, 0, 0.2]}>
+            <sphereGeometry args={[0.22, 32, 32]} />
+            <meshStandardMaterial color="#ff88ff" metalness={0.5} roughness={0.2} />
+          </mesh>
+          {/* Pupil */}
+          <mesh position={[0, 0, 0.25]}>
+            <sphereGeometry args={[0.15, 32, 32]} />
+            <meshStandardMaterial color="#000000" />
+          </mesh>
+          {/* Highlights */}
+          <mesh position={[0.1, 0.1, 0.3]}>
+            <sphereGeometry args={[0.08, 16, 16]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+          <mesh position={[-0.05, -0.05, 0.3]}>
+            <sphereGeometry args={[0.04, 16, 16]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+        </group>
+        {/* Right Eye */}
+        <group position={[0.3, 0.1, 0.5]}>
+          {/* Eye White */}
+          <mesh>
+            <sphereGeometry args={[0.3, 32, 32]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+          {/* Iris */}
+          <mesh position={[0, 0, 0.2]}>
+            <sphereGeometry args={[0.22, 32, 32]} />
+            <meshStandardMaterial color="#ff88ff" metalness={0.5} roughness={0.2} />
+          </mesh>
+          {/* Pupil */}
+          <mesh position={[0, 0, 0.25]}>
+            <sphereGeometry args={[0.15, 32, 32]} />
+            <meshStandardMaterial color="#000000" />
+          </mesh>
+          {/* Highlights */}
+          <mesh position={[0.1, 0.1, 0.3]}>
+            <sphereGeometry args={[0.08, 16, 16]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+          <mesh position={[-0.05, -0.05, 0.3]}>
+            <sphereGeometry args={[0.04, 16, 16]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+        </group>
+      </group>
       <Accessories position={[0, 0, 0]} accessories={accessories} />
     </group>,
 
@@ -367,13 +541,13 @@ const RobotHead: React.FC<RobotPartProps> = ({ position = [0, 2, 0], color, styl
         <boxGeometry args={[0.8, 0.8, 0.8]} />
         <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
       </mesh>
-      {/* LED Eyes */}
+      {/* Larger LED Eyes */}
       <mesh position={[0.2, 0.1, 0.41]}>
-        <sphereGeometry args={[0.1, 16, 16]} />
+        <sphereGeometry args={[0.15, 24, 24]} />
         <meshStandardMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
       </mesh>
       <mesh position={[-0.2, 0.1, 0.41]}>
-        <sphereGeometry args={[0.1, 16, 16]} />
+        <sphereGeometry args={[0.15, 24, 24]} />
         <meshStandardMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
       </mesh>
       {/* Speaker Mouth */}
@@ -389,6 +563,121 @@ const RobotHead: React.FC<RobotPartProps> = ({ position = [0, 2, 0], color, styl
         <boxGeometry args={[0.3, 0.01, 0.01]} />
         <meshStandardMaterial color="#000000" />
       </mesh>
+      {/* Enhanced LED Eyes */}
+      <group position={[0, 0, 0]}>
+        {/* Left Eye */}
+        <group position={[-0.2, 0.1, 0.41]}>
+          {/* LED Housing */}
+          <mesh>
+            <cylinderGeometry args={[0.18, 0.18, 0.1, 32]} />
+            <meshStandardMaterial color="#333333" metalness={0.9} roughness={0.1} />
+          </mesh>
+          {/* LED Core */}
+          <mesh position={[0, 0, 0.05]}>
+            <sphereGeometry args={[0.15, 32, 32]} />
+            <meshStandardMaterial 
+              color="#00ff00"
+              emissive="#00ff00"
+              emissiveIntensity={0.8}
+              metalness={0.2}
+              roughness={0.3}
+            />
+          </mesh>
+          {/* LED Highlight */}
+          <mesh position={[0.05, 0.05, 0.08]}>
+            <sphereGeometry args={[0.05, 16, 16]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+        </group>
+        {/* Right Eye */}
+        <group position={[0.2, 0.1, 0.41]}>
+          {/* LED Housing */}
+          <mesh>
+            <cylinderGeometry args={[0.18, 0.18, 0.1, 32]} />
+            <meshStandardMaterial color="#333333" metalness={0.9} roughness={0.1} />
+          </mesh>
+          {/* LED Core */}
+          <mesh position={[0, 0, 0.05]}>
+            <sphereGeometry args={[0.15, 32, 32]} />
+            <meshStandardMaterial 
+              color="#00ff00"
+              emissive="#00ff00"
+              emissiveIntensity={0.8}
+              metalness={0.2}
+              roughness={0.3}
+            />
+          </mesh>
+          {/* LED Highlight */}
+          <mesh position={[0.05, 0.05, 0.08]}>
+            <sphereGeometry args={[0.05, 16, 16]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+        </group>
+      </group>
+      <Accessories position={[0, 0, 0]} accessories={accessories} />
+    </group>,
+
+    // Style 6: Cute Modern Robot Head
+    <group position={position} key="head6">
+      {/* Main Head Shape */}
+      <mesh>
+        <boxGeometry args={[1.2, 0.8, 0.6]} />
+        <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
+      </mesh>
+      {/* Screen/Visor */}
+      <mesh position={[0, 0, 0.31]}>
+        <boxGeometry args={[1.0, 0.6, 0.01]} />
+        <meshStandardMaterial color="#000000" metalness={0.1} roughness={0.1} />
+      </mesh>
+      {/* Left Eye */}
+      <group position={[-0.25, 0, 0]} rotation={[0, 0, getEyeExpression().rotation || 0]}>
+        <mesh position={[0, getEyeExpression().position[1], getEyeExpression().position[2]]}>
+          <boxGeometry args={[0.25, 0.25 * (getEyeExpression().scaleY || 1), 0.01]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+      </group>
+      {/* Right Eye */}
+      <group position={[0.25, 0, 0]} rotation={[0, 0, getEyeExpression().rotation || 0]}>
+        <mesh position={[0, getEyeExpression().position[1], getEyeExpression().position[2]]}>
+          <boxGeometry args={[0.25, 0.25 * (getEyeExpression().scaleY || 1), 0.01]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+      </group>
+      {/* Mouth */}
+      {getMouthExpression().type === 'circle' ? (
+        <mesh position={getMouthExpression().position}>
+          <circleGeometry args={[0.1, 32]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+      ) : getMouthExpression().type === 'smile' ? (
+        <mesh position={getMouthExpression().position} rotation={[0, 0, Math.PI]}>
+          <torusGeometry args={[0.15, 0.03, 16, 16, Math.PI]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+      ) : getMouthExpression().type === 'frown' ? (
+        <mesh position={getMouthExpression().position}>
+          <torusGeometry args={[0.15, 0.03, 16, 16, Math.PI]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+      ) : (
+        <mesh position={getMouthExpression().position}>
+          <boxGeometry args={[0.3, 0.08, 0.01]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+      )}
+      {/* Antennas */}
+      {[-0.4, 0.4].map((x) => (
+        <group key={x} position={[x, 0.4, 0]}>
+          <mesh>
+            <cylinderGeometry args={[0.03, 0.03, 0.2, 8]} />
+            <meshStandardMaterial color="#4488ff" metalness={0.5} roughness={0.2} />
+          </mesh>
+          <mesh position={[0, 0.1, 0]}>
+            <sphereGeometry args={[0.04, 8, 8]} />
+            <meshStandardMaterial color="#4488ff" metalness={0.5} roughness={0.2} />
+          </mesh>
+        </group>
+      ))}
       <Accessories position={[0, 0, 0]} accessories={accessories} />
     </group>
   ];
@@ -396,7 +685,7 @@ const RobotHead: React.FC<RobotPartProps> = ({ position = [0, 2, 0], color, styl
   return headGeometries[style - 1];
 };
 
-const RobotBody: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, style }) => {
+const RobotBody: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, style, accessories }) => {
   const bodyGeometries = [
     // Style 1: Modern Armored Body
     <group position={position} key="body1">
@@ -520,13 +809,34 @@ const RobotBody: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, styl
         <boxGeometry args={[0.4, 0.4, 0.4]} />
         <meshStandardMaterial {...brassFinish} />
       </mesh>
+    </group>,
+
+    // Style 6: Cute Modern Body
+    <group position={position} key="body6">
+      {/* Main Body */}
+      <mesh>
+        <boxGeometry args={[1.0, 1.4, 0.8]} />
+        <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
+      </mesh>
+      {/* Core Circle */}
+      <mesh position={[0, 0, 0.41]}>
+        <cylinderGeometry args={[0.3, 0.3, 0.1, 16]} />
+        <meshStandardMaterial color="#ff4444" metalness={0.7} roughness={0.2} emissive="#ff0000" emissiveIntensity={0.3} />
+      </mesh>
+      {/* Decorative Lines */}
+      {[-0.3, 0.3].map((y) => (
+        <mesh key={y} position={[0, y, 0.41]}>
+          <boxGeometry args={[0.6, 0.05, 0.01]} />
+          <meshStandardMaterial color="#4488ff" metalness={0.5} roughness={0.2} />
+        </mesh>
+      ))}
     </group>
   ];
 
   return bodyGeometries[style - 1];
 };
 
-const RobotArms: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, style }) => {
+const RobotArms: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, style, accessories }) => {
   const armGeometries = [
     // Style 1: Modern Humanoid Arms
     <group position={position} key="arms1">
@@ -820,70 +1130,82 @@ const RobotArms: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, styl
       </group>
     </group>,
     
-    // Style 2: Mechanical Claw Arms
-    <group position={position} key="arms2">
+    // Style 4: Cute Modern Arms
+    <group position={position} key="arms4">
       {/* Left Arm */}
-      <group position={[-1.2, 0, 0]}>
-        <Pipe start={[0, 0, 0]} end={[-0.6, -0.6, 0]} radius={0.1} />
-        <group position={[-0.6, -0.6, 0]}>
-          <mesh>
-            <boxGeometry args={[0.3, 0.3, 0.3]} />
-            <meshStandardMaterial {...brassFinish} />
-          </mesh>
-          <Gear position={[0, 0, 0.2]} scale={0.3} />
-          {/* Claws */}
-          <Pipe start={[0.1, -0.1, 0]} end={[0.3, -0.3, 0]} radius={0.05} />
-          <Pipe start={[-0.1, -0.1, 0]} end={[-0.3, -0.3, 0]} radius={0.05} />
-        </group>
-      </group>
-      {/* Right Arm */}
-      <group position={[1.2, 0, 0]}>
-        <Pipe start={[0, 0, 0]} end={[0.6, -0.6, 0]} radius={0.1} />
-        <group position={[0.6, -0.6, 0]}>
-          <mesh>
-            <boxGeometry args={[0.3, 0.3, 0.3]} />
-            <meshStandardMaterial {...brassFinish} />
-          </mesh>
-          <Gear position={[0, 0, 0.2]} scale={0.3} />
-          {/* Claws */}
-          <Pipe start={[0.1, -0.1, 0]} end={[0.3, -0.3, 0]} radius={0.05} />
-          <Pipe start={[-0.1, -0.1, 0]} end={[-0.3, -0.3, 0]} radius={0.05} />
-        </group>
-      </group>
-    </group>,
-    
-    // Style 3: Steam Powered Arms
-    <group position={position} key="arms3">
-      {/* Left Arm */}
-      <group position={[-1.2, 0, 0]}>
+      <group position={[-0.8, 0.3, 0]}>
+        {/* Shoulder */}
         <mesh>
-          <cylinderGeometry args={[0.25, 0.25, 0.5]} />
-          <meshStandardMaterial {...copperFinish} />
+          <sphereGeometry args={[0.15, 16, 16]} />
+          <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
         </mesh>
-        <Gear position={[0, 0.3, 0]} scale={0.4} />
-        <Pipe start={[0, 0, 0]} end={[-0.5, -0.5, 0]} radius={0.12} />
-        <group position={[-0.5, -0.5, 0]}>
+        {/* Upper Arm */}
+        <group position={[-0.3, -0.2, 0]}>
           <mesh>
-            <sphereGeometry args={[0.2, 16, 16]} />
-            <meshStandardMaterial {...brassFinish} />
+            <cylinderGeometry args={[0.12, 0.12, 0.6, 8]} />
+            <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
           </mesh>
-          <Pipe start={[0, 0, 0]} end={[-0.3, -0.3, 0]} radius={0.08} />
+        </group>
+        {/* Elbow */}
+        <group position={[-0.3, -0.5, 0]}>
+          <mesh>
+            <sphereGeometry args={[0.13, 16, 16]} />
+            <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
+          </mesh>
+        </group>
+        {/* Forearm */}
+        <group position={[-0.3, -0.8, 0]}>
+          <mesh>
+            <cylinderGeometry args={[0.1, 0.1, 0.4, 8]} />
+            <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
+          </mesh>
+        </group>
+        {/* Claw */}
+        <group position={[-0.3, -1.0, 0]}>
+          {[-1, 1].map((side) => (
+            <mesh key={side} position={[side * 0.08, -0.1, 0]} rotation={[0, 0, side * Math.PI/6]}>
+              <boxGeometry args={[0.04, 0.2, 0.08]} />
+              <meshStandardMaterial color="#4488ff" metalness={0.5} roughness={0.2} />
+            </mesh>
+          ))}
         </group>
       </group>
-      {/* Right Arm */}
-      <group position={[1.2, 0, 0]}>
+      {/* Right Arm - mirrored */}
+      <group position={[0.8, 0.3, 0]} scale={[-1, 1, 1]}>
+        {/* Shoulder */}
         <mesh>
-          <cylinderGeometry args={[0.25, 0.25, 0.5]} />
-          <meshStandardMaterial {...copperFinish} />
+          <sphereGeometry args={[0.15, 16, 16]} />
+          <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
         </mesh>
-        <Gear position={[0, 0.3, 0]} scale={0.4} />
-        <Pipe start={[0, 0, 0]} end={[0.5, -0.5, 0]} radius={0.12} />
-        <group position={[0.5, -0.5, 0]}>
+        {/* Upper Arm */}
+        <group position={[-0.3, -0.2, 0]}>
           <mesh>
-            <sphereGeometry args={[0.2, 16, 16]} />
-            <meshStandardMaterial {...brassFinish} />
+            <cylinderGeometry args={[0.12, 0.12, 0.6, 8]} />
+            <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
           </mesh>
-          <Pipe start={[0, 0, 0]} end={[0.3, -0.3, 0]} radius={0.08} />
+        </group>
+        {/* Elbow */}
+        <group position={[-0.3, -0.5, 0]}>
+          <mesh>
+            <sphereGeometry args={[0.13, 16, 16]} />
+            <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
+          </mesh>
+        </group>
+        {/* Forearm */}
+        <group position={[-0.3, -0.8, 0]}>
+          <mesh>
+            <cylinderGeometry args={[0.1, 0.1, 0.4, 8]} />
+            <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
+          </mesh>
+        </group>
+        {/* Claw */}
+        <group position={[-0.3, -1.0, 0]}>
+          {[-1, 1].map((side) => (
+            <mesh key={side} position={[side * 0.08, -0.1, 0]} rotation={[0, 0, side * Math.PI/6]}>
+              <boxGeometry args={[0.04, 0.2, 0.08]} />
+              <meshStandardMaterial color="#4488ff" metalness={0.5} roughness={0.2} />
+            </mesh>
+          ))}
         </group>
       </group>
     </group>
@@ -892,7 +1214,7 @@ const RobotArms: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, styl
   return armGeometries[style - 1];
 };
 
-const RobotLegs: React.FC<RobotPartProps> = ({ position = [0, -2, 0], color, style }) => {
+const RobotLegs: React.FC<RobotPartProps> = ({ position = [0, -2, 0], color, style, accessories }) => {
   const legGeometries = [
     // Style 1: Modern Humanoid Legs
     <group position={position} key="legs1">
@@ -1188,71 +1510,87 @@ const RobotLegs: React.FC<RobotPartProps> = ({ position = [0, -2, 0], color, sty
       </group>
     </group>,
     
-    // Style 2: Hydraulic Legs
-    <group position={position} key="legs2">
+    // Style 4: Cute Modern Legs
+    <group position={position} key="legs4">
       {/* Left Leg */}
-      <group position={[-0.5, 0, 0]}>
+      <group position={[-0.4, 0, 0]}>
+        {/* Hip */}
         <mesh>
-          <boxGeometry args={[0.4, 1.2, 0.4]} />
-          <meshStandardMaterial {...brassFinish} />
+          <sphereGeometry args={[0.15, 16, 16]} />
+          <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
         </mesh>
-        <Gear position={[0.3, 0, 0.3]} scale={0.4} />
-        <mesh position={[0, -0.8, 0]}>
-          <cylinderGeometry args={[0.3, 0.2, 0.8]} />
-          <meshStandardMaterial {...copperFinish} />
-        </mesh>
-        <Pipe start={[0.2, 0.4, 0]} end={[0.2, -0.4, 0]} radius={0.06} />
+        {/* Upper Leg */}
+        <group position={[0, -0.4, 0]}>
+          <mesh>
+            <boxGeometry args={[0.25, 0.8, 0.25]} />
+            <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
+          </mesh>
+        </group>
+        {/* Knee */}
+        <group position={[0, -0.8, 0]}>
+          <mesh>
+            <sphereGeometry args={[0.15, 16, 16]} />
+            <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
+          </mesh>
+        </group>
+        {/* Lower Leg */}
+        <group position={[0, -1.2, 0]}>
+          <mesh>
+            <boxGeometry args={[0.2, 0.6, 0.2]} />
+            <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
+          </mesh>
+        </group>
+        {/* Foot with Wheel */}
+        <group position={[0, -1.6, 0]}>
+          <mesh>
+            <boxGeometry args={[0.3, 0.2, 0.4]} />
+            <meshStandardMaterial color="#4488ff" metalness={0.5} roughness={0.2} />
+          </mesh>
+          <mesh position={[0, -0.1, 0]} rotation={[Math.PI/2, 0, 0]}>
+            <cylinderGeometry args={[0.1, 0.1, 0.3, 16]} />
+            <meshStandardMaterial color="#000000" metalness={0.7} roughness={0.2} />
+          </mesh>
+        </group>
       </group>
-      {/* Right Leg */}
-      <group position={[0.5, 0, 0]}>
+      {/* Right Leg - mirrored */}
+      <group position={[0.4, 0, 0]}>
+        {/* Hip */}
         <mesh>
-          <boxGeometry args={[0.4, 1.2, 0.4]} />
-          <meshStandardMaterial {...brassFinish} />
+          <sphereGeometry args={[0.15, 16, 16]} />
+          <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
         </mesh>
-        <Gear position={[-0.3, 0, 0.3]} scale={0.4} />
-        <mesh position={[0, -0.8, 0]}>
-          <cylinderGeometry args={[0.3, 0.2, 0.8]} />
-          <meshStandardMaterial {...copperFinish} />
-        </mesh>
-        <Pipe start={[-0.2, 0.4, 0]} end={[-0.2, -0.4, 0]} radius={0.06} />
-      </group>
-    </group>,
-    
-    // Style 3: Steam Walker Legs
-    <group position={position} key="legs3">
-      {/* Left Leg */}
-      <group position={[-0.5, 0, 0]}>
-        <mesh>
-          <cylinderGeometry args={[0.35, 0.3, 0.8]} />
-          <meshStandardMaterial {...copperFinish} />
-        </mesh>
-        <Gear position={[0.3, 0.2, 0.2]} scale={0.5} />
-        <mesh position={[0, -0.6, 0]}>
-          <boxGeometry args={[0.5, 0.8, 0.5]} />
-          <meshStandardMaterial {...brassFinish} />
-        </mesh>
-        <Pipe start={[0.2, 0.2, 0]} end={[0.2, -1, 0]} radius={0.08} />
-        <mesh position={[0, -1.2, 0]}>
-          <cylinderGeometry args={[0.4, 0.4, 0.1]} />
-          <meshStandardMaterial {...copperFinish} />
-        </mesh>
-      </group>
-      {/* Right Leg */}
-      <group position={[0.5, 0, 0]}>
-        <mesh>
-          <cylinderGeometry args={[0.35, 0.3, 0.8]} />
-          <meshStandardMaterial {...copperFinish} />
-        </mesh>
-        <Gear position={[-0.3, 0.2, 0.2]} scale={0.5} />
-        <mesh position={[0, -0.6, 0]}>
-          <boxGeometry args={[0.5, 0.8, 0.5]} />
-          <meshStandardMaterial {...brassFinish} />
-        </mesh>
-        <Pipe start={[-0.2, 0.2, 0]} end={[-0.2, -1, 0]} radius={0.08} />
-        <mesh position={[0, -1.2, 0]}>
-          <cylinderGeometry args={[0.4, 0.4, 0.1]} />
-          <meshStandardMaterial {...copperFinish} />
-        </mesh>
+        {/* Upper Leg */}
+        <group position={[0, -0.4, 0]}>
+          <mesh>
+            <boxGeometry args={[0.25, 0.8, 0.25]} />
+            <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
+          </mesh>
+        </group>
+        {/* Knee */}
+        <group position={[0, -0.8, 0]}>
+          <mesh>
+            <sphereGeometry args={[0.15, 16, 16]} />
+            <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
+          </mesh>
+        </group>
+        {/* Lower Leg */}
+        <group position={[0, -1.2, 0]}>
+          <mesh>
+            <boxGeometry args={[0.2, 0.6, 0.2]} />
+            <meshStandardMaterial color="#88ccff" metalness={0.5} roughness={0.2} />
+          </mesh>
+        </group>
+        {/* Foot with Wheel */}
+        <group position={[0, -1.6, 0]}>
+          <mesh>
+            <boxGeometry args={[0.3, 0.2, 0.4]} />
+            <meshStandardMaterial color="#4488ff" metalness={0.5} roughness={0.2} />
+          </mesh>
+          <mesh position={[0, -0.1, 0]} rotation={[Math.PI/2, 0, 0]}>
+            <cylinderGeometry args={[0.1, 0.1, 0.3, 16]} />
+            <meshStandardMaterial color="#000000" metalness={0.7} roughness={0.2} />
+          </mesh>
+        </group>
       </group>
     </group>
   ];
@@ -1261,38 +1599,22 @@ const RobotLegs: React.FC<RobotPartProps> = ({ position = [0, -2, 0], color, sty
 };
 
 interface Robot3DProps {
-  parts: {
-    head: number;
-    body: number;
-    arms: number;
-    legs: number;
-    color: string;
-    accessories?: {
-      hat?: boolean;
-      mustache?: boolean;
-      lipstick?: boolean;
-    };
-  };
+  color: string;
+  head: number;
+  body: number;
+  arms: number;
+  legs: number;
+  accessories?: RobotPartProps['accessories'];
 }
 
-const Robot3D: React.FC<Robot3DProps> = ({ parts }) => {
+const Robot3D: FC<Robot3DProps> = ({ color, head, body, arms, legs, accessories }) => {
   return (
-    <Canvas camera={{ position: [0, 0, 10], fov: 50 }}>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={0.8} />
-      <pointLight position={[-10, -10, -10]} intensity={0.3} />
-      <spotLight position={[0, 5, 5]} intensity={0.5} angle={0.5} penumbra={1} />
-      
-      <group rotation={[0, Math.PI / 4, 0]}>
-        <RobotHead color={parts.color} style={parts.head} accessories={parts.accessories} />
-        <RobotBody color={parts.color} style={parts.body} />
-        <RobotArms color={parts.color} style={parts.arms} />
-        <RobotLegs color={parts.color} style={parts.legs} />
-      </group>
-      
-      <OrbitControls enableZoom={true} enablePan={false} />
-      <gridHelper args={[20, 20, "#4fc3f7", "#4fc3f7"]} position={[0, -3, 0]} />
-    </Canvas>
+    <group>
+      <RobotHead position={[0, 2, 0]} color={color} style={head} accessories={accessories} />
+      <RobotBody position={[0, 0, 0]} color={color} style={body} accessories={accessories} />
+      <RobotArms position={[0, 0, 0]} color={color} style={arms} accessories={accessories} />
+      <RobotLegs position={[0, 0, 0]} color={color} style={legs} accessories={accessories} />
+    </group>
   );
 };
 
