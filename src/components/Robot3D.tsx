@@ -2,7 +2,6 @@ import React, { FC, useState, useEffect } from 'react';
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment, ContactShadows } from '@react-three/drei';
-import { Accessories } from './Accessories';
 
 // Material presets
 const getMaterialWithColor = (baseMaterial: any, color?: string) => {
@@ -106,63 +105,6 @@ interface RobotPartProps {
   };
 }
 
-const Gear: React.FC<{ position: [number, number, number], scale?: number, rotation?: [number, number, number] }> = 
-  ({ position, scale = 1, rotation = [0, 0, 0] }) => (
-  <group position={position} rotation={rotation}>
-    <mesh>
-      <cylinderGeometry args={[0.3 * scale, 0.3 * scale, 0.1 * scale, 12]} />
-      <meshPhysicalMaterial {...glowMaterial} />
-    </mesh>
-    {Array.from({ length: 8 }).map((_, i) => (
-      <mesh key={i} position={[
-        Math.cos(i * Math.PI / 4) * 0.4 * scale,
-        0,
-        Math.sin(i * Math.PI / 4) * 0.4 * scale
-      ]}>
-        <boxGeometry args={[0.1 * scale, 0.1 * scale, 0.2 * scale]} />
-        <meshPhysicalMaterial {...glowMaterial} />
-      </mesh>
-    ))}
-  </group>
-);
-
-const Pipe: React.FC<{ start: [number, number, number], end: [number, number, number], radius?: number }> = 
-  ({ start, end, radius = 0.1 }) => {
-  const direction = new THREE.Vector3().subVectors(
-    new THREE.Vector3(...end),
-    new THREE.Vector3(...start)
-  );
-  const length = direction.length();
-  const center = new THREE.Vector3().addVectors(
-    new THREE.Vector3(...start),
-    direction.multiplyScalar(0.5)
-  );
-  const rotation = new THREE.Euler().setFromVector3(
-    new THREE.Vector3(
-      Math.atan2(direction.z, direction.y),
-      Math.atan2(direction.x, direction.z),
-      Math.atan2(direction.y, direction.x)
-    )
-  );
-
-  return (
-    <group position={[center.x, center.y, center.z]} rotation={[rotation.x, rotation.y, rotation.z]}>
-      <mesh>
-        <cylinderGeometry args={[radius, radius, length, 8]} />
-        <meshPhysicalMaterial {...glowMaterial} />
-      </mesh>
-      <mesh position={[0, length/2, 0]}>
-        <torusGeometry args={[radius * 1.5, radius * 0.3, 8, 8]} />
-        <meshPhysicalMaterial {...glowMaterial} />
-      </mesh>
-      <mesh position={[0, -length/2, 0]}>
-        <torusGeometry args={[radius * 1.5, radius * 0.3, 8, 8]} />
-        <meshPhysicalMaterial {...glowMaterial} />
-      </mesh>
-    </group>
-  );
-};
-
 const RobotHead: FC<RobotPartProps> = ({ color, style, accessories }) => {
   const [expression, setExpression] = useState<string>('neutral');
   const [isBlinking, setIsBlinking] = useState<boolean>(false);
@@ -186,72 +128,6 @@ const RobotHead: FC<RobotPartProps> = ({ color, style, accessories }) => {
     }, 5000);
     return () => clearInterval(expressionInterval);
   }, []);
-
-  const getEyeExpression = () => {
-    if (isBlinking) {
-      return {
-        scaleY: 0.1,
-        position: new THREE.Vector3(0, 0, 0.32),
-        rotation: 0
-      };
-    }
-
-    switch (expression) {
-      case 'happy':
-        return {
-          scaleY: 0.5,
-          position: new THREE.Vector3(0, 0.03, 0.32),
-          rotation: 0
-        };
-      case 'surprised':
-        return {
-          scaleY: 1.2,
-          position: new THREE.Vector3(0, 0, 0.32),
-          rotation: 0
-        };
-      case 'angry':
-        return {
-          scaleY: 0.4,
-          position: new THREE.Vector3(0, 0.03, 0.32),
-          rotation: Math.PI / 12
-        };
-      default:
-        return {
-          scaleY: 1,
-          position: new THREE.Vector3(0, 0, 0.32),
-          rotation: 0
-        };
-    }
-  };
-
-  const getMouthExpression = () => {
-    switch (expression) {
-      case 'happy':
-        return {
-          scale: [0.4, 0.15, 1] as [number, number, number],
-          position: new THREE.Vector3(0, -0.15, 0.32),
-          type: 'smile'
-        };
-      case 'surprised':
-        return {
-          scale: [0.2, 0.2, 1] as [number, number, number],
-          position: new THREE.Vector3(0, -0.15, 0.32),
-          type: 'circle'
-        };
-      case 'angry':
-        return {
-          scale: [0.4, 0.1, 1] as [number, number, number],
-          position: new THREE.Vector3(0, -0.15, 0.32),
-          type: 'frown'
-        };
-      default:
-        return {
-          scale: [0.3, 0.08, 1] as [number, number, number],
-          position: new THREE.Vector3(0, -0.15, 0.32),
-          type: 'neutral'
-        };
-    }
-  };
 
   const renderAccessories = (headStyle: number) => {
     if (!accessories) return null;
