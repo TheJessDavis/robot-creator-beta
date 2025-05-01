@@ -2,7 +2,7 @@ import React, { FC, useState, useEffect } from 'react';
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { Accessories } from '.';
+import { Accessories } from './Accessories';
 
 // Material presets
 const brassFinish = {
@@ -29,8 +29,7 @@ const glassFinish = {
   opacity: 0.7,
 };
 
-export interface RobotPartProps {
-  position?: THREE.Vector3 | [number, number, number];
+interface RobotPartProps {
   color: string;
   style: number;
   accessories?: {
@@ -97,7 +96,7 @@ const Pipe: React.FC<{ start: [number, number, number], end: [number, number, nu
   );
 };
 
-const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, accessories }) => {
+const RobotHead: FC<RobotPartProps> = ({ color, style, accessories }) => {
   const [expression, setExpression] = useState<string>('neutral');
   const [isBlinking, setIsBlinking] = useState<boolean>(false);
 
@@ -121,7 +120,7 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
     const blinkInterval = setInterval(() => {
       setIsBlinking(true);
       setTimeout(() => setIsBlinking(false), 200);
-    }, 1500); // Changed from 3000 to 1500 for more frequent blinking
+    }, 1500);
     return () => clearInterval(blinkInterval);
   }, []);
 
@@ -140,7 +139,8 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
     if (isBlinking) {
       return {
         scaleY: 0.1,
-        position: [0, 0, 0.32] as [number, number, number]
+        position: new THREE.Vector3(0, 0, 0.32),
+        rotation: 0
       };
     }
 
@@ -148,23 +148,26 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
       case 'happy':
         return {
           scaleY: 0.5,
-          position: [0, 0.03, 0.32] as [number, number, number]
+          position: new THREE.Vector3(0, 0.03, 0.32),
+          rotation: 0
         };
       case 'surprised':
         return {
           scaleY: 1.2,
-          position: [0, 0, 0.32] as [number, number, number]
+          position: new THREE.Vector3(0, 0, 0.32),
+          rotation: 0
         };
       case 'angry':
         return {
           scaleY: 0.4,
-          rotation: Math.PI / 12,
-          position: [0, 0.03, 0.32] as [number, number, number]
+          position: new THREE.Vector3(0, 0.03, 0.32),
+          rotation: Math.PI / 12
         };
       default:
         return {
           scaleY: 1,
-          position: [0, 0, 0.32] as [number, number, number]
+          position: new THREE.Vector3(0, 0, 0.32),
+          rotation: 0
         };
     }
   };
@@ -174,25 +177,25 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
       case 'happy':
         return {
           scale: [0.4, 0.15, 1] as [number, number, number],
-          position: [0, -0.15, 0.32] as [number, number, number],
+          position: new THREE.Vector3(0, -0.15, 0.32),
           type: 'smile'
         };
       case 'surprised':
         return {
           scale: [0.2, 0.2, 1] as [number, number, number],
-          position: [0, -0.15, 0.32] as [number, number, number],
+          position: new THREE.Vector3(0, -0.15, 0.32),
           type: 'circle'
         };
       case 'angry':
         return {
           scale: [0.4, 0.1, 1] as [number, number, number],
-          position: [0, -0.15, 0.32] as [number, number, number],
+          position: new THREE.Vector3(0, -0.15, 0.32),
           type: 'frown'
         };
       default:
         return {
           scale: [0.3, 0.08, 1] as [number, number, number],
-          position: [0, -0.15, 0.32] as [number, number, number],
+          position: new THREE.Vector3(0, -0.15, 0.32),
           type: 'neutral'
         };
     }
@@ -200,7 +203,7 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
 
   const headGeometries = [
     // Style 1: Modern Visor Head
-    <group position={position} key="head1">
+    <group key="head1">
       {/* Main Head Shape */}
       <mesh>
         <cylinderGeometry args={[0.7, 0.5, 0.9, 8]} />
@@ -264,11 +267,11 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
           ))}
         </group>
       ))}
-      <Accessories position={[0, 0, 0]} accessories={accessories} />
+      <Accessories accessories={accessories} />
     </group>,
     
     // Style 2: Friendly Robot Head
-    <group position={position} key="head2">
+    <group key="head2">
       <mesh>
         <sphereGeometry args={[0.7, 32, 32]} />
         <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
@@ -300,7 +303,7 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
         <meshStandardMaterial color="#000000" />
       </mesh>
       {/* Enhanced Expressive Eyes */}
-      <group position={[0, 0, 0]}>
+      <group>
         {/* Left Eye */}
         <group position={[-0.3, 0.1, 0.5]}>
           {/* Eye White */}
@@ -348,11 +351,11 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
           </mesh>
         </group>
       </group>
-      <Accessories position={[0, 0, 0]} accessories={accessories} />
+      <Accessories accessories={accessories} />
     </group>,
     
     // Style 3: Steampunk Humanoid Head
-    <group position={position} key="head3">
+    <group key="head3">
       <mesh>
         <sphereGeometry args={[0.7, 32, 32]} />
         <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
@@ -379,7 +382,7 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
       <Gear position={[0.4, 0.2, 0.4]} scale={0.3} />
       <Gear position={[-0.4, 0.2, 0.4]} scale={0.3} />
       {/* Enhanced Goggle Eyes */}
-      <group position={[0, 0, 0]}>
+      <group>
         {/* Left Eye */}
         <group position={[-0.25, 0.1, 0.5]}>
           {/* Goggle Frame */}
@@ -439,11 +442,11 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
           ))}
         </group>
       </group>
-      <Accessories position={[0, 0, 0]} accessories={accessories} />
+      <Accessories accessories={accessories} />
     </group>,
 
     // Style 4: Anime-Style Head
-    <group position={position} key="head4">
+    <group key="head4">
       <mesh>
         <sphereGeometry args={[0.7, 32, 32]} />
         <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
@@ -476,7 +479,7 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
         <meshStandardMaterial color="#000000" />
       </mesh>
       {/* Enhanced Anime Eyes */}
-      <group position={[0, 0, 0]}>
+      <group>
         {/* Left Eye */}
         <group position={[-0.3, 0.1, 0.5]}>
           {/* Eye White */}
@@ -532,11 +535,11 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
           </mesh>
         </group>
       </group>
-      <Accessories position={[0, 0, 0]} accessories={accessories} />
+      <Accessories accessories={accessories} />
     </group>,
 
     // Style 5: Classic Robot Head
-    <group position={position} key="head5">
+    <group key="head5">
       <mesh>
         <boxGeometry args={[0.8, 0.8, 0.8]} />
         <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
@@ -564,7 +567,7 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
         <meshStandardMaterial color="#000000" />
       </mesh>
       {/* Enhanced LED Eyes */}
-      <group position={[0, 0, 0]}>
+      <group>
         {/* Left Eye */}
         <group position={[-0.2, 0.1, 0.41]}>
           {/* LED Housing */}
@@ -614,11 +617,11 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
           </mesh>
         </group>
       </group>
-      <Accessories position={[0, 0, 0]} accessories={accessories} />
+      <Accessories accessories={accessories} />
     </group>,
 
     // Style 6: Cute Modern Robot Head
-    <group position={position} key="head6">
+    <group key="head6">
       {/* Main Head Shape */}
       <mesh>
         <boxGeometry args={[1.2, 0.8, 0.6]} />
@@ -631,36 +634,36 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
       </mesh>
       {/* Left Eye */}
       <group position={[-0.25, 0, 0]} rotation={[0, 0, getEyeExpression().rotation || 0]}>
-        <mesh position={[0, getEyeExpression().position[1], getEyeExpression().position[2]]}>
+        <mesh position={[0, getEyeExpression().position.y, getEyeExpression().position.z]}>
           <boxGeometry args={[0.25, 0.25 * (getEyeExpression().scaleY || 1), 0.01]} />
           <meshStandardMaterial color="#ffffff" />
         </mesh>
       </group>
       {/* Right Eye */}
       <group position={[0.25, 0, 0]} rotation={[0, 0, getEyeExpression().rotation || 0]}>
-        <mesh position={[0, getEyeExpression().position[1], getEyeExpression().position[2]]}>
+        <mesh position={[0, getEyeExpression().position.y, getEyeExpression().position.z]}>
           <boxGeometry args={[0.25, 0.25 * (getEyeExpression().scaleY || 1), 0.01]} />
           <meshStandardMaterial color="#ffffff" />
         </mesh>
       </group>
       {/* Mouth */}
       {getMouthExpression().type === 'circle' ? (
-        <mesh position={getMouthExpression().position}>
+        <mesh position={[getMouthExpression().position.x, getMouthExpression().position.y, getMouthExpression().position.z]}>
           <circleGeometry args={[0.1, 32]} />
           <meshStandardMaterial color="#ffffff" />
         </mesh>
       ) : getMouthExpression().type === 'smile' ? (
-        <mesh position={getMouthExpression().position} rotation={[0, 0, Math.PI]}>
+        <mesh position={[getMouthExpression().position.x, getMouthExpression().position.y, getMouthExpression().position.z]} rotation={[0, 0, Math.PI]}>
           <torusGeometry args={[0.15, 0.03, 16, 16, Math.PI]} />
           <meshStandardMaterial color="#ffffff" />
         </mesh>
       ) : getMouthExpression().type === 'frown' ? (
-        <mesh position={getMouthExpression().position}>
+        <mesh position={[getMouthExpression().position.x, getMouthExpression().position.y, getMouthExpression().position.z]}>
           <torusGeometry args={[0.15, 0.03, 16, 16, Math.PI]} />
           <meshStandardMaterial color="#ffffff" />
         </mesh>
       ) : (
-        <mesh position={getMouthExpression().position}>
+        <mesh position={[getMouthExpression().position.x, getMouthExpression().position.y, getMouthExpression().position.z]}>
           <boxGeometry args={[0.3, 0.08, 0.01]} />
           <meshStandardMaterial color="#ffffff" />
         </mesh>
@@ -678,17 +681,17 @@ const RobotHead: FC<RobotPartProps> = ({ position = [0, 2, 0], color, style, acc
           </mesh>
         </group>
       ))}
-      <Accessories position={[0, 0, 0]} accessories={accessories} />
+      <Accessories accessories={accessories} />
     </group>
   ];
 
   return headGeometries[style - 1];
 };
 
-const RobotBody: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, style, accessories }) => {
+const RobotBody: React.FC<RobotPartProps> = ({ color, style, accessories }) => {
   const bodyGeometries = [
     // Style 1: Modern Armored Body
-    <group position={position} key="body1">
+    <group key="body1">
       {/* Main Torso */}
       <mesh>
         <boxGeometry args={[1.2, 1.8, 0.8]} />
@@ -747,7 +750,7 @@ const RobotBody: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, styl
     </group>,
     
     // Style 2: Clockwork Body
-    <group position={position} key="body2">
+    <group key="body2">
       <mesh>
         <boxGeometry args={[1.8, 2.2, 1]} />
         <meshStandardMaterial {...brassFinish} />
@@ -765,7 +768,7 @@ const RobotBody: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, styl
     </group>,
     
     // Style 3: Industrial Furnace Body
-    <group position={position} key="body3">
+    <group key="body3">
       <mesh>
         <cylinderGeometry args={[1.2, 1, 2.2, 8]} />
         <meshStandardMaterial color={color} metalness={0.9} roughness={0.2} />
@@ -782,7 +785,7 @@ const RobotBody: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, styl
     </group>,
 
     // Style 4: Feminine Body
-    <group position={position} key="body4">
+    <group key="body4">
       <mesh>
         <cylinderGeometry args={[0.8, 1, 2, 8]} />
         <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
@@ -795,7 +798,7 @@ const RobotBody: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, styl
     </group>,
 
     // Style 5: Masculine Body
-    <group position={position} key="body5">
+    <group key="body5">
       <mesh>
         <boxGeometry args={[1.2, 2.4, 1]} />
         <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
@@ -812,7 +815,7 @@ const RobotBody: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, styl
     </group>,
 
     // Style 6: Cute Modern Body
-    <group position={position} key="body6">
+    <group key="body6">
       {/* Main Body */}
       <mesh>
         <boxGeometry args={[1.0, 1.4, 0.8]} />
@@ -836,10 +839,10 @@ const RobotBody: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, styl
   return bodyGeometries[style - 1];
 };
 
-const RobotArms: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, style, accessories }) => {
+const RobotArms: React.FC<RobotPartProps> = ({ color, style, accessories }) => {
   const armGeometries = [
     // Style 1: Modern Humanoid Arms
-    <group position={position} key="arms1">
+    <group key="arms1">
       {/* Left Arm */}
       <group position={[-1.2, 0, 0]}>
         {/* Enhanced Shoulder Joint */}
@@ -1131,7 +1134,7 @@ const RobotArms: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, styl
     </group>,
     
     // Style 4: Cute Modern Arms
-    <group position={position} key="arms4">
+    <group key="arms4">
       {/* Left Arm */}
       <group position={[-0.8, 0.3, 0]}>
         {/* Shoulder */}
@@ -1214,10 +1217,10 @@ const RobotArms: React.FC<RobotPartProps> = ({ position = [0, 0, 0], color, styl
   return armGeometries[style - 1];
 };
 
-const RobotLegs: React.FC<RobotPartProps> = ({ position = [0, -2, 0], color, style, accessories }) => {
+const RobotLegs: React.FC<RobotPartProps> = ({ color, style, accessories }) => {
   const legGeometries = [
     // Style 1: Modern Humanoid Legs
-    <group position={position} key="legs1">
+    <group key="legs1">
       {/* Left Leg */}
       <group position={[-0.4, 0, 0]}>
         {/* Enhanced Hip Joint */}
@@ -1511,7 +1514,7 @@ const RobotLegs: React.FC<RobotPartProps> = ({ position = [0, -2, 0], color, sty
     </group>,
     
     // Style 4: Cute Modern Legs
-    <group position={position} key="legs4">
+    <group key="legs4">
       {/* Left Leg */}
       <group position={[-0.4, 0, 0]}>
         {/* Hip */}
@@ -1598,23 +1601,44 @@ const RobotLegs: React.FC<RobotPartProps> = ({ position = [0, -2, 0], color, sty
   return legGeometries[style - 1];
 };
 
-interface Robot3DProps {
+interface RobotParts {
   color: string;
   head: number;
   body: number;
   arms: number;
   legs: number;
-  accessories?: RobotPartProps['accessories'];
+  accessories?: {
+    hat?: boolean;
+    mustache?: boolean;
+    lipstick?: boolean;
+  };
 }
 
-const Robot3D: FC<Robot3DProps> = ({ color, head, body, arms, legs, accessories }) => {
+interface Robot3DProps {
+  parts: RobotParts;
+}
+
+const Robot3D: FC<Robot3DProps> = ({ parts }) => {
   return (
-    <group>
-      <RobotHead position={[0, 2, 0]} color={color} style={head} accessories={accessories} />
-      <RobotBody position={[0, 0, 0]} color={color} style={body} accessories={accessories} />
-      <RobotArms position={[0, 0, 0]} color={color} style={arms} accessories={accessories} />
-      <RobotLegs position={[0, 0, 0]} color={color} style={legs} accessories={accessories} />
-    </group>
+    <Canvas>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} />
+      <group>
+        <group position={[0, 2, 0]}>
+          <RobotHead color={parts.color} style={parts.head} accessories={parts.accessories} />
+        </group>
+        <group position={[0, 0, 0]}>
+          <RobotBody color={parts.color} style={parts.body} />
+        </group>
+        <group position={[0, 0, 0]}>
+          <RobotArms color={parts.color} style={parts.arms} />
+        </group>
+        <group position={[0, -2, 0]}>
+          <RobotLegs color={parts.color} style={parts.legs} />
+        </group>
+      </group>
+      <OrbitControls enableZoom={true} enablePan={false} />
+    </Canvas>
   );
 };
 

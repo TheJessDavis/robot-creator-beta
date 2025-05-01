@@ -1,9 +1,14 @@
 import React, { FC } from 'react';
-import { RobotPartProps } from './Robot3D';
+import * as THREE from 'three';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
 
 interface AccessoriesProps {
-  position: [number, number, number];
-  accessories?: RobotPartProps['accessories'];
+  accessories?: {
+    hat?: boolean;
+    mustache?: boolean;
+    lipstick?: boolean;
+  };
 }
 
 const brassFinish = {
@@ -20,11 +25,11 @@ const copperFinish = {
   emissive: '#000000',
 };
 
-export const Accessories: FC<AccessoriesProps> = ({ position, accessories }) => {
+export const Accessories: FC<AccessoriesProps> = ({ accessories }) => {
   if (!accessories) return null;
 
   return (
-    <group position={position}>
+    <group>
       {/* Cowboy Hat */}
       {accessories.hat && (
         <group position={[0, 0.8, 0]}>

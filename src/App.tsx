@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, FC } from 'react';
 import {
   Container,
   MainPanel,
@@ -38,14 +38,18 @@ const ACCESSORY_PRESETS = [
   { hat: true, mustache: true, lipstick: true },    // All accessories
 ];
 
-const App: React.FC = () => {
-  const [robotParts, setRobotParts] = useState<RobotParts>({
+const App: FC = () => {
+  const [robotParts, setRobotParts] = useState({
+    color: '#88ccff',
     head: 1,
     body: 1,
     arms: 1,
     legs: 1,
-    color: '#4fc3f7',
-    accessories: ACCESSORY_PRESETS[0]
+    accessories: {
+      hat: false,
+      mustache: false,
+      lipstick: false
+    }
   });
 
   const [accessoryIndex, setAccessoryIndex] = useState(0);
