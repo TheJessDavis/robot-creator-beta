@@ -1,11 +1,9 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { createGlobalStyle } from 'styled-components';
 import App from './App';
 
 const GlobalStyle = createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
   * {
     margin: 0;
     padding: 0;
@@ -19,10 +17,13 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-ReactDOM.render(
+const container = document.getElementById('root');
+if (!container) throw new Error('Failed to find the root element');
+const root = createRoot(container);
+
+root.render(
   <React.StrictMode>
     <GlobalStyle />
     <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+  </React.StrictMode>
 ); 
