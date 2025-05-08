@@ -5,7 +5,6 @@ import RobotHead from './RobotHead';
 import RobotBody from './RobotBody';
 import RobotArms from './RobotArms';
 import RobotLegs from './RobotLegs';
-import RobotAccessories from './RobotAccessories';
 import RobotNeck from './RobotNeck';
 
 interface Robot3DProps {
@@ -15,7 +14,6 @@ interface Robot3DProps {
     body: number;
     arms: number;
     legs: number;
-    accessory: number;
   };
 }
 
@@ -35,7 +33,6 @@ const Robot3D: FC<Robot3DProps> = ({ parts }) => {
         <RobotBody color={parts.color} style={parts.body} />
         <RobotArms color={parts.color} style={parts.arms} />
         <RobotLegs color={parts.color} style={parts.legs} />
-        <RobotAccessories color={parts.color} style={parts.accessory} />
       </group>
 
       <Grid

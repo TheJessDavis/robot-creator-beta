@@ -17,7 +17,6 @@ interface RobotParts {
   arms: number;
   legs: number;
   color: string;
-  accessory: number;
 }
 
 // Map numeric values to string descriptions
@@ -30,8 +29,7 @@ const App: FC = () => {
     body: 0,
     arms: 0,
     legs: 0,
-    color: '#808080',
-    accessory: -1
+    color: '#808080'
   });
 
   const [savedConfigs, setSavedConfigs] = useState<RobotParts[]>([]);
@@ -85,8 +83,7 @@ const App: FC = () => {
       head: 4,
       body: 4,
       arms: 4,
-      legs: 4,
-      accessory: 5
+      legs: 4
     };
 
     setRobotParts(prev => ({
@@ -146,7 +143,6 @@ const App: FC = () => {
           <Button onClick={() => updatePart('body')}>BODY</Button>
           <Button onClick={() => updatePart('arms')}>ARMS</Button>
           <Button onClick={() => updatePart('legs')}>LEGS</Button>
-          <Button onClick={() => updatePart('accessory')}>ACCESSORY</Button>
         </ControlPanel>
 
         <ColorPicker
@@ -179,8 +175,7 @@ const App: FC = () => {
             body: randomPart(),
             arms: randomPart(),
             legs: randomPart(),
-            color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
-            accessory: -1
+            color: `#${Math.floor(Math.random()*16777215).toString(16)}`
           });
         }}>
           RANDOMIZE CONFIGURATION
