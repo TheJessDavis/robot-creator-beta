@@ -2,6 +2,7 @@
   "name": "robot-creator",
   "version": "1.0.0",
   "private": true,
+  "homepage": "https://the.jess.davis.github.io/robot-creator",
   "dependencies": {
     "@react-spring/core": "9.7.3",
     "@react-spring/shared": "9.7.3",
@@ -28,7 +29,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -50,6 +53,7 @@
   },
   "devDependencies": {
     "@types/lodash": "4.14.201",
-    "@types/three": "0.159.0"
+    "@types/three": "0.159.0",
+    "gh-pages": "^6.3.0"
   }
 }
