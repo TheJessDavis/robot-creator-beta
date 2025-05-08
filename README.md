@@ -1,46 +1,41 @@
-# Robot Creator Machine
+# Robot Creator
 
-A fun web application that lets you create and customize your own robot! Mix and match different robot parts and colors to create unique robot characters.
+An interactive 3D robot customization tool built with React and Three.js.
 
 ## Features
 
-- Choose from different styles for robot head, body, arms, and legs
+- Create and customize your own robot
+- Choose from different head, body, arm, and leg styles
 - Customize robot color
-- Randomize robot parts and colors
-- Modern and intuitive user interface
+- Save and share your robot configurations
+- Export your robot as an image
 
-## Getting Started
+## Development
 
-### Prerequisites
-
-- Node.js (v14 or higher)
-- npm (v6 or higher)
-
-### Installation
-
-1. Clone this repository
-2. Navigate to the project directory:
-   ```bash
-   cd robot-creator
-   ```
-3. Install dependencies:
+1. Clone the repository
+2. Install dependencies:
    ```bash
    npm install
    ```
-4. Start the development server:
+3. Start the development server:
    ```bash
    npm start
    ```
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-## Usage
+## Building for Production
 
-- Click the different part buttons to cycle through available styles for each robot part
-- Use the color picker to change the robot's color
-- Click the "Randomize Robot" button to generate a random combination of parts and colors
+To create a production build:
+
+```bash
+npm run build
+```
+
+The built files will be in the `build` directory.
 
 ## Technologies Used
 
 - React
-- TypeScript
-- Styled Components 
+- Three.js
+- React Three Fiber
+- Styled Components
+- TypeScript 
