@@ -20,6 +20,10 @@ interface RobotParts {
   accessory: number;
 }
 
+// Map numeric values to string descriptions
+const headStyles = ['cubic', 'round', 'cylindrical', 'small', 'large'];
+const armStyles = ['standard', 'claw', 'tool', 'gun', 'shield'];
+
 const App: FC = () => {
   const [robotParts, setRobotParts] = useState<RobotParts>({
     head: 0,
@@ -31,6 +35,21 @@ const App: FC = () => {
   });
 
   const [savedConfigs, setSavedConfigs] = useState<RobotParts[]>([]);
+
+  // Function to send robot data to parent window
+  const sendRobotData = () => {
+    const robotData = {
+      head: headStyles[robotParts.head],
+      color: robotParts.color,
+      arms: armStyles[robotParts.arms]
+    };
+    window.parent.postMessage(robotData, "*");
+  };
+
+  // Send data whenever robot configuration changes
+  useEffect(() => {
+    sendRobotData();
+  }, [robotParts]);
 
   // Load saved configurations from localStorage on component mount
   useEffect(() => {

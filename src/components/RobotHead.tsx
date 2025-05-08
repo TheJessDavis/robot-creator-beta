@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import * as THREE from 'three';
 
 interface RobotHeadProps {
@@ -7,6 +7,20 @@ interface RobotHeadProps {
 }
 
 const RobotHead: FC<RobotHeadProps> = ({ color, style }) => {
+  const [eyesOpen, setEyesOpen] = useState(true);
+
+  useEffect(() => {
+    let blinkTimeout: NodeJS.Timeout;
+    const interval = setInterval(() => {
+      setEyesOpen(false);
+      blinkTimeout = setTimeout(() => setEyesOpen(true), 120);
+    }, 2500 + Math.random() * 2000);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(blinkTimeout);
+    };
+  }, []);
+
   const renderHead = () => {
     switch (style) {
       case 0: // Cubic head with LED eyes and display
@@ -17,14 +31,29 @@ const RobotHead: FC<RobotHeadProps> = ({ color, style }) => {
               <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />
             </mesh>
             {/* LED Eyes */}
-            <mesh position={[-0.15, 1.1, 0.31]}>
-              <sphereGeometry args={[0.08, 16, 16]} />
-              <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
-            </mesh>
-            <mesh position={[0.15, 1.1, 0.31]}>
-              <sphereGeometry args={[0.08, 16, 16]} />
-              <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
-            </mesh>
+            {eyesOpen ? (
+              <>
+                <mesh position={[-0.15, 1.1, 0.31]}>
+                  <sphereGeometry args={[0.08, 16, 16]} />
+                  <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
+                </mesh>
+                <mesh position={[0.15, 1.1, 0.31]}>
+                  <sphereGeometry args={[0.08, 16, 16]} />
+                  <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
+                </mesh>
+              </>
+            ) : (
+              <>
+                <mesh position={[-0.15, 1.1, 0.31]}>
+                  <boxGeometry args={[0.16, 0.02, 0.02]} />
+                  <meshPhysicalMaterial color="#00ff00" />
+                </mesh>
+                <mesh position={[0.15, 1.1, 0.31]}>
+                  <boxGeometry args={[0.16, 0.02, 0.02]} />
+                  <meshPhysicalMaterial color="#00ff00" />
+                </mesh>
+              </>
+            )}
             {/* Nose */}
             <mesh position={[0, 1.0, 0.31]}>
               <boxGeometry args={[0.05, 0.05, 0.05]} />
@@ -45,23 +74,38 @@ const RobotHead: FC<RobotHeadProps> = ({ color, style }) => {
               <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />
             </mesh>
             {/* Camera Eyes */}
-            <mesh position={[-0.15, 1.1, 0.35]}>
-              <cylinderGeometry args={[0.08, 0.08, 0.05, 32]} />
-              <meshPhysicalMaterial color="#000000" />
-            </mesh>
-            <mesh position={[0.15, 1.1, 0.35]}>
-              <cylinderGeometry args={[0.08, 0.08, 0.05, 32]} />
-              <meshPhysicalMaterial color="#000000" />
-            </mesh>
-            {/* Camera Lenses */}
-            <mesh position={[-0.15, 1.1, 0.38]}>
-              <sphereGeometry args={[0.06, 16, 16]} />
-              <meshPhysicalMaterial color="#444444" metalness={0.9} roughness={0.1} />
-            </mesh>
-            <mesh position={[0.15, 1.1, 0.38]}>
-              <sphereGeometry args={[0.06, 16, 16]} />
-              <meshPhysicalMaterial color="#444444" metalness={0.9} roughness={0.1} />
-            </mesh>
+            {eyesOpen ? (
+              <>
+                <mesh position={[-0.15, 1.1, 0.35]}>
+                  <cylinderGeometry args={[0.08, 0.08, 0.05, 32]} />
+                  <meshPhysicalMaterial color="#000000" />
+                </mesh>
+                <mesh position={[0.15, 1.1, 0.35]}>
+                  <cylinderGeometry args={[0.08, 0.08, 0.05, 32]} />
+                  <meshPhysicalMaterial color="#000000" />
+                </mesh>
+                {/* Camera Lenses */}
+                <mesh position={[-0.15, 1.1, 0.38]}>
+                  <sphereGeometry args={[0.06, 16, 16]} />
+                  <meshPhysicalMaterial color="#444444" metalness={0.9} roughness={0.1} />
+                </mesh>
+                <mesh position={[0.15, 1.1, 0.38]}>
+                  <sphereGeometry args={[0.06, 16, 16]} />
+                  <meshPhysicalMaterial color="#444444" metalness={0.9} roughness={0.1} />
+                </mesh>
+              </>
+            ) : (
+              <>
+                <mesh position={[-0.15, 1.1, 0.35]}>
+                  <boxGeometry args={[0.16, 0.02, 0.05]} />
+                  <meshPhysicalMaterial color="#000000" />
+                </mesh>
+                <mesh position={[0.15, 1.1, 0.35]}>
+                  <boxGeometry args={[0.16, 0.02, 0.05]} />
+                  <meshPhysicalMaterial color="#000000" />
+                </mesh>
+              </>
+            )}
             {/* Nose */}
             <mesh position={[0, 1.0, 0.38]}>
               <sphereGeometry args={[0.04, 16, 16]} />
@@ -73,13 +117,22 @@ const RobotHead: FC<RobotHeadProps> = ({ color, style }) => {
               <meshPhysicalMaterial color="#1a1a1a" />
             </mesh>
             {/* Ears */}
-            <mesh position={[-0.45, 1.0, 0]}>
-              <sphereGeometry args={[0.08, 16, 16]} />
+            <mesh position={[-0.45, 1.3, 0]} rotation={[0, 0, -0.2]}>
+              <cylinderGeometry args={[0.08, 0.06, 0.4, 16]} />
               <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} />
             </mesh>
-            <mesh position={[0.45, 1.0, 0]}>
-              <sphereGeometry args={[0.08, 16, 16]} />
+            <mesh position={[0.45, 1.3, 0]} rotation={[0, 0, 0.2]}>
+              <cylinderGeometry args={[0.08, 0.06, 0.4, 16]} />
               <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} />
+            </mesh>
+            {/* Inner Ears */}
+            <mesh position={[-0.45, 1.3, 0]} rotation={[0, 0, -0.2]}>
+              <cylinderGeometry args={[0.06, 0.04, 0.35, 16]} />
+              <meshPhysicalMaterial color="#ff9999" metalness={0.3} roughness={0.4} />
+            </mesh>
+            <mesh position={[0.45, 1.3, 0]} rotation={[0, 0, 0.2]}>
+              <cylinderGeometry args={[0.06, 0.04, 0.35, 16]} />
+              <meshPhysicalMaterial color="#ff9999" metalness={0.3} roughness={0.4} />
             </mesh>
           </group>
         );
@@ -96,14 +149,29 @@ const RobotHead: FC<RobotHeadProps> = ({ color, style }) => {
               <meshPhysicalMaterial color="#1a1a1a" />
             </mesh>
             {/* Eyes */}
-            <mesh position={[-0.1, 1.1, 0.32]}>
-              <circleGeometry args={[0.05, 16]} />
-              <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
-            </mesh>
-            <mesh position={[0.1, 1.1, 0.32]}>
-              <circleGeometry args={[0.05, 16]} />
-              <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
-            </mesh>
+            {eyesOpen ? (
+              <>
+                <mesh position={[-0.1, 1.1, 0.32]}>
+                  <circleGeometry args={[0.05, 16]} />
+                  <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
+                </mesh>
+                <mesh position={[0.1, 1.1, 0.32]}>
+                  <circleGeometry args={[0.05, 16]} />
+                  <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
+                </mesh>
+              </>
+            ) : (
+              <>
+                <mesh position={[-0.1, 1.1, 0.32]}>
+                  <boxGeometry args={[0.1, 0.01, 0.01]} />
+                  <meshPhysicalMaterial color="#00ff00" />
+                </mesh>
+                <mesh position={[0.1, 1.1, 0.32]}>
+                  <boxGeometry args={[0.1, 0.01, 0.01]} />
+                  <meshPhysicalMaterial color="#00ff00" />
+                </mesh>
+              </>
+            )}
             {/* Nose */}
             <mesh position={[0, 1.0, 0.32]}>
               <circleGeometry args={[0.03, 16]} />

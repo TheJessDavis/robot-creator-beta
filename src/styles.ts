@@ -1,6 +1,17 @@
 import styled from 'styled-components';
 
+// Import Wilhelm font
+const wilhelmFont = `
+  @font-face {
+    font-family: 'Wilhelm';
+    src: url('/fonts/Wilhelm.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
+`;
+
 export const Container = styled.div`
+  ${wilhelmFont}
   width: 100%;
   min-height: 100vh;
   background-color: #f5f7fa;
@@ -31,6 +42,9 @@ export const Header = styled.div`
     font-size: 2.5rem;
     margin: 0;
     text-shadow: 0 0 10px rgba(33, 150, 243, 0.2);
+    font-family: 'Wilhelm', 'Courier New', monospace;
+    letter-spacing: 2px;
+    text-transform: uppercase;
   }
 `;
 
@@ -78,6 +92,9 @@ export const Button = styled.button`
   font-size: 1rem;
   font-weight: bold;
   transition: all 0.2s ease;
+  font-family: 'Wilhelm', 'Courier New', monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 
   &:hover {
     background: linear-gradient(180deg, #4a6b8a 0%, #415a77 100%);
