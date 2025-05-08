@@ -70,7 +70,7 @@ export const ControlPanel = styled.div`
 
 export const Button = styled.button`
   padding: 0.8rem 1.5rem;
-  background: linear-gradient(180deg, #2196f3 0%, #1976d2 100%);
+  background: linear-gradient(180deg, #415a77 0%, #34495e 100%);
   border: none;
   border-radius: 5px;
   color: #ffffff;
@@ -80,9 +80,9 @@ export const Button = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background: linear-gradient(180deg, #42a5f5 0%, #2196f3 100%);
+    background: linear-gradient(180deg, #4a6b8a 0%, #415a77 100%);
     transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(33, 150, 243, 0.2);
+    box-shadow: 0 2px 5px rgba(65, 90, 119, 0.2);
   }
 `;
 

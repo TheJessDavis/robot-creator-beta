@@ -11,7 +11,7 @@ const RobotArms: FC<RobotArmsProps> = ({ color, style }) => {
     switch (style) {
       case 0:
         return (
-          <group>
+          <group position={[0, -0.2, 0]}>
             {/* Left Arm */}
             <group position={[-0.6, 0, 0]}>
               <mesh position={[0, 0, 0]}>
@@ -38,7 +38,7 @@ const RobotArms: FC<RobotArmsProps> = ({ color, style }) => {
         );
       case 1:
         return (
-          <group>
+          <group position={[0, -0.2, 0]}>
             {/* Left Arm */}
             <group position={[-0.6, 0, 0]}>
               <mesh position={[0, 0, 0]}>
@@ -65,7 +65,7 @@ const RobotArms: FC<RobotArmsProps> = ({ color, style }) => {
         );
       case 2:
         return (
-          <group>
+          <group position={[0, -0.2, 0]}>
             {/* Left Arm */}
             <group position={[-0.6, 0, 0]}>
               <mesh position={[0, 0, 0]}>
@@ -92,7 +92,7 @@ const RobotArms: FC<RobotArmsProps> = ({ color, style }) => {
         );
       case 3:
         return (
-          <group>
+          <group position={[0, -0.2, 0]}>
             {/* Left Arm */}
             <group position={[-0.6, 0, 0]}>
               <mesh position={[0, 0, 0]}>
@@ -119,7 +119,7 @@ const RobotArms: FC<RobotArmsProps> = ({ color, style }) => {
         );
       case 4:
         return (
-          <group>
+          <group position={[0, -0.2, 0]}>
             {/* Left Arm */}
             <group position={[-0.6, 0, 0]}>
               <mesh position={[0, 0, 0]}>

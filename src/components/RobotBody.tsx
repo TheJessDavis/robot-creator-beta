@@ -11,7 +11,7 @@ const RobotBody: FC<RobotBodyProps> = ({ color, style }) => {
     switch (style) {
       case 0:
         return (
-          <group>
+          <group position={[0, -0.2, 0]}>
             <mesh position={[0, 0, 0]}>
               <boxGeometry args={[1, 1.5, 0.5]} />
               <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />
@@ -24,7 +24,7 @@ const RobotBody: FC<RobotBodyProps> = ({ color, style }) => {
         );
       case 1:
         return (
-          <group>
+          <group position={[0, -0.2, 0]}>
             <mesh position={[0, 0, 0]}>
               <cylinderGeometry args={[0.5, 0.5, 1.5, 32]} />
               <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />
@@ -37,7 +37,7 @@ const RobotBody: FC<RobotBodyProps> = ({ color, style }) => {
         );
       case 2:
         return (
-          <group>
+          <group position={[0, -0.2, 0]}>
             <mesh position={[0, 0, 0]}>
               <sphereGeometry args={[0.7, 32, 32]} />
               <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />
@@ -50,7 +50,7 @@ const RobotBody: FC<RobotBodyProps> = ({ color, style }) => {
         );
       case 3:
         return (
-          <group>
+          <group position={[0, -0.2, 0]}>
             <mesh position={[0, 0, 0]}>
               <boxGeometry args={[1, 1.5, 0.5]} />
               <meshPhysicalMaterial color={color} metalness={0.6} roughness={0.15} clearcoat={1.0} clearcoatRoughness={0.1} />
@@ -63,7 +63,7 @@ const RobotBody: FC<RobotBodyProps> = ({ color, style }) => {
         );
       case 4:
         return (
-          <group>
+          <group position={[0, -0.2, 0]}>
             <mesh position={[0, 0, 0]}>
               <boxGeometry args={[1, 1.5, 0.5]} />
               <meshPhysicalMaterial color={color} metalness={0.8} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />

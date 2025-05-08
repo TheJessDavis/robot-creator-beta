@@ -4,201 +4,197 @@ import * as THREE from 'three';
 interface RobotHeadProps {
   color: string;
   style: number;
-  accessories?: {
-    hat?: 'cowboy' | 'bonnet' | false;
-    mustache?: boolean;
-    lipstick?: boolean;
-  };
 }
 
-const RobotHead: FC<RobotHeadProps> = ({ color, style, accessories }) => {
+const RobotHead: FC<RobotHeadProps> = ({ color, style }) => {
   const renderHead = () => {
     switch (style) {
-      case 0:
+      case 0: // Cubic head with LED eyes and display
         return (
-          <mesh position={[0, 0.8, 0]}>
-            <boxGeometry args={[0.6, 0.6, 0.6]} />
-            <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />
-          </mesh>
+          <group>
+            <mesh position={[0, 1.0, 0]}>
+              <boxGeometry args={[0.6, 0.6, 0.6]} />
+              <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />
+            </mesh>
+            {/* LED Eyes */}
+            <mesh position={[-0.15, 1.1, 0.31]}>
+              <sphereGeometry args={[0.08, 16, 16]} />
+              <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
+            </mesh>
+            <mesh position={[0.15, 1.1, 0.31]}>
+              <sphereGeometry args={[0.08, 16, 16]} />
+              <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
+            </mesh>
+            {/* Nose */}
+            <mesh position={[0, 1.0, 0.31]}>
+              <boxGeometry args={[0.05, 0.05, 0.05]} />
+              <meshPhysicalMaterial color="#444444" />
+            </mesh>
+            {/* Mouth */}
+            <mesh position={[0, 0.9, 0.31]}>
+              <boxGeometry args={[0.2, 0.05, 0.01]} />
+              <meshPhysicalMaterial color="#1a1a1a" />
+            </mesh>
+          </group>
         );
-      case 1:
+      case 1: // Spherical head with camera eyes
         return (
-          <mesh position={[0, 0.8, 0]}>
-            <sphereGeometry args={[0.4, 32, 32]} />
-            <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />
-          </mesh>
+          <group>
+            <mesh position={[0, 1.0, 0]}>
+              <sphereGeometry args={[0.4, 32, 32]} />
+              <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />
+            </mesh>
+            {/* Camera Eyes */}
+            <mesh position={[-0.15, 1.1, 0.35]}>
+              <cylinderGeometry args={[0.08, 0.08, 0.05, 32]} />
+              <meshPhysicalMaterial color="#000000" />
+            </mesh>
+            <mesh position={[0.15, 1.1, 0.35]}>
+              <cylinderGeometry args={[0.08, 0.08, 0.05, 32]} />
+              <meshPhysicalMaterial color="#000000" />
+            </mesh>
+            {/* Camera Lenses */}
+            <mesh position={[-0.15, 1.1, 0.38]}>
+              <sphereGeometry args={[0.06, 16, 16]} />
+              <meshPhysicalMaterial color="#444444" metalness={0.9} roughness={0.1} />
+            </mesh>
+            <mesh position={[0.15, 1.1, 0.38]}>
+              <sphereGeometry args={[0.06, 16, 16]} />
+              <meshPhysicalMaterial color="#444444" metalness={0.9} roughness={0.1} />
+            </mesh>
+            {/* Nose */}
+            <mesh position={[0, 1.0, 0.38]}>
+              <sphereGeometry args={[0.04, 16, 16]} />
+              <meshPhysicalMaterial color="#444444" />
+            </mesh>
+            {/* Mouth */}
+            <mesh position={[0, 0.9, 0.38]}>
+              <boxGeometry args={[0.15, 0.03, 0.01]} />
+              <meshPhysicalMaterial color="#1a1a1a" />
+            </mesh>
+            {/* Ears */}
+            <mesh position={[-0.45, 1.0, 0]}>
+              <sphereGeometry args={[0.08, 16, 16]} />
+              <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} />
+            </mesh>
+            <mesh position={[0.45, 1.0, 0]}>
+              <sphereGeometry args={[0.08, 16, 16]} />
+              <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} />
+            </mesh>
+          </group>
         );
-      case 2:
+      case 2: // Cylindrical head with radar face
         return (
-          <mesh position={[0, 0.8, 0]}>
-            <cylinderGeometry args={[0.3, 0.3, 0.6, 32]} />
-            <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />
-          </mesh>
+          <group>
+            <mesh position={[0, 1.0, 0]}>
+              <cylinderGeometry args={[0.3, 0.3, 0.6, 32]} />
+              <meshPhysicalMaterial color={color} metalness={0.7} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />
+            </mesh>
+            {/* Radar Face */}
+            <mesh position={[0, 1.0, 0.31]}>
+              <circleGeometry args={[0.25, 32]} />
+              <meshPhysicalMaterial color="#1a1a1a" />
+            </mesh>
+            {/* Eyes */}
+            <mesh position={[-0.1, 1.1, 0.32]}>
+              <circleGeometry args={[0.05, 16]} />
+              <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
+            </mesh>
+            <mesh position={[0.1, 1.1, 0.32]}>
+              <circleGeometry args={[0.05, 16]} />
+              <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
+            </mesh>
+            {/* Nose */}
+            <mesh position={[0, 1.0, 0.32]}>
+              <circleGeometry args={[0.03, 16]} />
+              <meshPhysicalMaterial color="#444444" />
+            </mesh>
+            {/* Mouth */}
+            <mesh position={[0, 0.9, 0.32]}>
+              <boxGeometry args={[0.15, 0.02, 0.01]} />
+              <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.3} />
+            </mesh>
+            {/* Radar Scanner */}
+            <mesh position={[0, 1.0, 0.32]} rotation={[0, 0, Math.PI / 4]}>
+              <boxGeometry args={[0.4, 0.02, 0.01]} />
+              <meshPhysicalMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.5} />
+            </mesh>
+          </group>
         );
-      case 3:
+      case 3: // Small cubic head with sensor array
         return (
-          <mesh position={[0, 0.8, 0]}>
-            <boxGeometry args={[0.5, 0.5, 0.5]} />
-            <meshPhysicalMaterial color={color} metalness={0.6} roughness={0.15} clearcoat={1.0} clearcoatRoughness={0.1} />
-          </mesh>
+          <group>
+            <mesh position={[0, 1.0, 0]}>
+              <boxGeometry args={[0.5, 0.5, 0.5]} />
+              <meshPhysicalMaterial color={color} metalness={0.6} roughness={0.15} clearcoat={1.0} clearcoatRoughness={0.1} />
+            </mesh>
+            {/* Eyes */}
+            <mesh position={[-0.15, 1.1, 0.26]}>
+              <sphereGeometry args={[0.05, 16, 16]} />
+              <meshPhysicalMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.5} />
+            </mesh>
+            <mesh position={[0.15, 1.1, 0.26]}>
+              <sphereGeometry args={[0.05, 16, 16]} />
+              <meshPhysicalMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.5} />
+            </mesh>
+            {/* Nose */}
+            <mesh position={[0, 1.0, 0.26]}>
+              <boxGeometry args={[0.04, 0.04, 0.04]} />
+              <meshPhysicalMaterial color="#444444" />
+            </mesh>
+            {/* Mouth */}
+            <mesh position={[0, 0.9, 0.26]}>
+              <boxGeometry args={[0.2, 0.03, 0.01]} />
+              <meshPhysicalMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.3} />
+            </mesh>
+            {/* Sensor Array */}
+            <mesh position={[0, 1.1, 0.26]}>
+              <boxGeometry args={[0.4, 0.1, 0.01]} />
+              <meshPhysicalMaterial color="#1a1a1a" />
+            </mesh>
+          </group>
         );
-      case 4:
+      case 4: // Large cubic head with display matrix
         return (
-          <mesh position={[0, 0.8, 0]}>
-            <boxGeometry args={[0.55, 0.55, 0.55]} />
-            <meshPhysicalMaterial color={color} metalness={0.8} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />
-          </mesh>
+          <group>
+            <mesh position={[0, 1.0, 0]}>
+              <boxGeometry args={[0.55, 0.55, 0.55]} />
+              <meshPhysicalMaterial color={color} metalness={0.8} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.1} />
+            </mesh>
+            {/* Eyes */}
+            <mesh position={[-0.15, 1.1, 0.28]}>
+              <boxGeometry args={[0.1, 0.1, 0.01]} />
+              <meshPhysicalMaterial color="#40F7FF" emissive="#40F7FF" emissiveIntensity={0.5} />
+            </mesh>
+            <mesh position={[0.15, 1.1, 0.28]}>
+              <boxGeometry args={[0.1, 0.1, 0.01]} />
+              <meshPhysicalMaterial color="#40F7FF" emissive="#40F7FF" emissiveIntensity={0.5} />
+            </mesh>
+            {/* Nose */}
+            <mesh position={[0, 1.0, 0.28]}>
+              <boxGeometry args={[0.05, 0.05, 0.05]} />
+              <meshPhysicalMaterial color="#444444" />
+            </mesh>
+            {/* Mouth */}
+            <mesh position={[0, 0.9, 0.28]}>
+              <boxGeometry args={[0.25, 0.05, 0.01]} />
+              <meshPhysicalMaterial color="#40F7FF" emissive="#40F7FF" emissiveIntensity={0.3} />
+            </mesh>
+            {/* Display Matrix */}
+            <mesh position={[0, 1.0, 0.28]}>
+              <boxGeometry args={[0.4, 0.4, 0.01]} />
+              <meshPhysicalMaterial color="#000000" />
+            </mesh>
+          </group>
         );
       default:
         return null;
     }
   };
 
-  const renderAccessories = (headStyle: number) => {
-    if (!accessories) return null;
-
-    type StylePositions = {
-      [key: number]: [number, number, number];
-    };
-
-    type AccessoryPositions = {
-      hat: StylePositions;
-      mustache: StylePositions;
-      lipstick: StylePositions;
-    };
-
-    const positions: AccessoryPositions = {
-      hat: {
-        0: [0, 0.6, 0],
-        1: [0, 0.5, 0],
-        2: [0, 0.5, 0],
-        3: [0, 0.5, 0],
-        4: [0, 0.5, 0.1],
-      },
-      mustache: {
-        0: [0, -0.05, 0.42],
-        1: [0, -0.1, 0.37],
-        2: [0, -0.05, 0.52],
-        3: [0, -0.05, 0.52],
-        4: [0, -0.05, 0.51],
-      },
-      lipstick: {
-        0: [0, -0.15, 0.42],
-        1: [0, -0.2, 0.37],
-        2: [0, -0.15, 0.52],
-        3: [0, -0.15, 0.52],
-        4: [0, -0.15, 0.51],
-      }
-    };
-
-    const renderCowboyHat = (position: [number, number, number]) => (
-      <group position={position}>
-        <mesh position={[0, 0.15, 0]}>
-          <cylinderGeometry args={[0.3, 0.35, 0.3, 32]} />
-          <meshPhysicalMaterial color="#8B4513" metalness={0.5} roughness={0.3} clearcoat={1.0} clearcoatRoughness={0.1} />
-        </mesh>
-        <mesh position={[0, 0, 0]}>
-          <cylinderGeometry args={[0.6, 0.6, 0.05, 32]} />
-          <meshPhysicalMaterial color="#8B4513" metalness={0.5} roughness={0.3} clearcoat={1.0} clearcoatRoughness={0.1} />
-        </mesh>
-        <mesh position={[0, 0.1, 0]}>
-          <torusGeometry args={[0.35, 0.03, 16, 32]} />
-          <meshPhysicalMaterial color="#4A2803" metalness={0.6} roughness={0.2} clearcoat={1.0} clearcoatRoughness={0.1} />
-        </mesh>
-        <mesh position={[-0.2, 0.25, 0]} rotation={[0, 0, Math.PI / 6]}>
-          <sphereGeometry args={[0.1, 16, 16]} />
-          <meshPhysicalMaterial color="#8B4513" metalness={0.5} roughness={0.3} clearcoat={1.0} clearcoatRoughness={0.1} />
-        </mesh>
-        <mesh position={[0.2, 0.25, 0]} rotation={[0, 0, -Math.PI / 6]}>
-          <sphereGeometry args={[0.1, 16, 16]} />
-          <meshPhysicalMaterial color="#8B4513" metalness={0.5} roughness={0.3} clearcoat={1.0} clearcoatRoughness={0.1} />
-        </mesh>
-      </group>
-    );
-
-    const renderBonnet = (position: [number, number, number]) => (
-      <group position={position}>
-        <mesh rotation={[Math.PI / 6, 0, 0]}>
-          <sphereGeometry args={[0.4, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          <meshPhysicalMaterial color="#FFB6C1" side={THREE.DoubleSide} />
-        </mesh>
-        <mesh position={[0, 0, 0.2]} rotation={[Math.PI / 3, 0, 0]}>
-          <torusGeometry args={[0.4, 0.05, 16, 32, Math.PI]} />
-          <meshPhysicalMaterial color="#FFB6C1" />
-        </mesh>
-        <mesh position={[0, 0.1, 0.3]} rotation={[Math.PI / 3, 0, 0]}>
-          <boxGeometry args={[0.6, 0.08, 0.02]} />
-          <meshPhysicalMaterial color="#FF69B4" />
-        </mesh>
-        <group position={[0.25, 0.1, 0.3]} rotation={[Math.PI / 3, 0, 0]}>
-          <mesh rotation={[0, 0, Math.PI / 4]}>
-            <boxGeometry args={[0.2, 0.05, 0.02]} />
-            <meshPhysicalMaterial color="#FF69B4" />
-          </mesh>
-          <mesh rotation={[0, 0, -Math.PI / 4]}>
-            <boxGeometry args={[0.2, 0.05, 0.02]} />
-            <meshPhysicalMaterial color="#FF69B4" />
-          </mesh>
-        </group>
-        {Array.from({ length: 8 }).map((_, i) => (
-          <mesh
-            key={i}
-            position={[
-              Math.cos((i * Math.PI) / 4) * 0.35,
-              -0.1,
-              Math.sin((i * Math.PI) / 4) * 0.35
-            ]}
-            rotation={[0, (i * Math.PI) / 4, 0]}
-          >
-            <boxGeometry args={[0.1, 0.05, 0.02]} />
-            <meshPhysicalMaterial color="#FFB6C1" />
-          </mesh>
-        ))}
-      </group>
-    );
-
-    return (
-      <group>
-        {accessories.hat && (
-          <>
-            {accessories.hat === 'cowboy' && renderCowboyHat(positions.hat[headStyle] || positions.hat[0])}
-            {accessories.hat === 'bonnet' && renderBonnet(positions.hat[headStyle] || positions.hat[0])}
-          </>
-        )}
-        <group position={[0, 0, 0.01]}>
-          {accessories.mustache && (
-            <group position={positions.mustache[headStyle] || positions.mustache[0]}>
-              <mesh>
-                <torusGeometry args={[0.15, 0.03, 16, 32, Math.PI]} />
-                <meshPhysicalMaterial color="#222222" />
-              </mesh>
-              <mesh position={[-0.15, 0, 0]}>
-                <sphereGeometry args={[0.03, 8, 8]} />
-                <meshPhysicalMaterial color="#222222" />
-              </mesh>
-              <mesh position={[0.15, 0, 0]}>
-                <sphereGeometry args={[0.03, 8, 8]} />
-                <meshPhysicalMaterial color="#222222" />
-              </mesh>
-            </group>
-          )}
-          {accessories.lipstick && (
-            <group position={positions.lipstick[headStyle] || positions.lipstick[0]}>
-              <mesh>
-                <torusGeometry args={[0.1, 0.02, 16, 32, Math.PI]} />
-                <meshPhysicalMaterial color="#FF1493" />
-              </mesh>
-            </group>
-          )}
-        </group>
-      </group>
-    );
-  };
-
   return (
     <group>
       {renderHead()}
-      {renderAccessories(style)}
     </group>
   );
 };

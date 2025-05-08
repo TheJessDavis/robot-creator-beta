@@ -1,4 +1,4 @@
-import React, { useState, FC } from 'react';
+import React, { useState, FC, useEffect } from 'react';
 import {
   Container,
   MainPanel,
@@ -6,7 +6,6 @@ import {
   RobotCanvas,
   ControlPanel,
   Button,
-  ModuleStatus,
   ColorPicker,
   ToolsDecoration
 } from './styles';
@@ -18,71 +17,98 @@ interface RobotParts {
   arms: number;
   legs: number;
   color: string;
-  accessories: {
-    hat: 'cowboy' | 'bonnet' | false;
-    mustache: boolean;
-    lipstick: boolean;
-  };
+  accessory: number;
 }
-
-// Predefined accessory combinations
-const ACCESSORY_PRESETS = [
-  { hat: false, mustache: false, lipstick: false },     // None
-  { hat: 'cowboy', mustache: false, lipstick: false },  // Just cowboy hat
-  { hat: 'bonnet', mustache: false, lipstick: false },  // Just bonnet
-  { hat: 'cowboy', mustache: true, lipstick: false },   // Cowboy hat + mustache
-  { hat: false, mustache: true, lipstick: false },      // Just mustache
-  { hat: false, mustache: false, lipstick: true },      // Just lipstick
-  { hat: 'bonnet', mustache: false, lipstick: true },   // Bonnet + lipstick
-  { hat: 'cowboy', mustache: true, lipstick: true },    // Cowboy hat + mustache + lipstick
-];
 
 const App: FC = () => {
   const [robotParts, setRobotParts] = useState<RobotParts>({
-    color: '#88ccff',
-    head: 1,
-    body: 1,
-    arms: 1,
-    legs: 1,
-    accessories: {
-      hat: false,
-      mustache: false,
-      lipstick: false
-    }
+    head: 0,
+    body: 0,
+    arms: 0,
+    legs: 0,
+    color: '#808080',
+    accessory: -1
   });
 
-  const [accessoryIndex, setAccessoryIndex] = useState(0);
+  const [savedConfigs, setSavedConfigs] = useState<RobotParts[]>([]);
+
+  // Load saved configurations from localStorage on component mount
+  useEffect(() => {
+    const savedConfigsStr = localStorage.getItem('savedRobotConfigs');
+    if (savedConfigsStr) {
+      setSavedConfigs(JSON.parse(savedConfigsStr));
+    }
+  }, []);
+
+  // Save configurations to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('savedRobotConfigs', JSON.stringify(savedConfigs));
+  }, [savedConfigs]);
+
+  // Load configuration from URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const config = params.get('config');
+    if (config) {
+      try {
+        const decodedConfig = JSON.parse(atob(config));
+        setRobotParts(decodedConfig);
+      } catch (error) {
+        console.error('Failed to parse configuration:', error);
+      }
+    }
+  }, []);
 
   const updatePart = (part: keyof RobotParts) => {
-    if (typeof robotParts[part] === 'number') {
-      setRobotParts(prev => ({
-        ...prev,
-        [part]: (prev[part] as number % 5) + 1,
-      }));
-    }
-  };
+    if (part === 'color') return;
+    
+    const maxValues: { [key: string]: number } = {
+      head: 4,
+      body: 4,
+      arms: 4,
+      legs: 4,
+      accessory: 5
+    };
 
-  const cycleAccessories = () => {
-    const nextIndex = (accessoryIndex + 1) % ACCESSORY_PRESETS.length;
-    setAccessoryIndex(nextIndex);
     setRobotParts(prev => ({
       ...prev,
-      accessories: ACCESSORY_PRESETS[nextIndex] as RobotParts['accessories']
+      [part]: (prev[part] + 1) % (maxValues[part] + 1)
     }));
   };
 
-  const getAccessoryDescription = () => {
-    const { hat, mustache, lipstick } = robotParts.accessories;
-    if (!hat && !mustache && !lipstick) return "NO ACCESSORIES";
-    const active = [];
-    if (hat === 'cowboy') active.push("COWBOY HAT");
-    if (hat === 'bonnet') active.push("BONNET");
-    if (mustache) active.push("MUSTACHE");
-    if (lipstick) active.push("LIPSTICK");
-    return active.join(" + ");
+  const saveCurrentConfig = () => {
+    setSavedConfigs(prev => [...prev, robotParts]);
   };
 
-  const [completedModules, setCompletedModules] = useState(0);
+  const generateShareableLink = () => {
+    const config = btoa(JSON.stringify(robotParts));
+    const url = `${window.location.origin}${window.location.pathname}?config=${config}`;
+    navigator.clipboard.writeText(url);
+    alert('Shareable link copied to clipboard!');
+  };
+
+  const captureRobotImage = async () => {
+    const canvas = document.querySelector('canvas');
+    if (canvas) {
+      try {
+        const blob = await new Promise<Blob | null>((resolve) => {
+          canvas.toBlob((blob) => resolve(blob), 'image/png');
+        });
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'robot-configuration.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+      } catch (error) {
+        console.error('Failed to capture robot image:', error);
+      }
+    }
+  };
 
   return (
     <Container>
@@ -101,12 +127,7 @@ const App: FC = () => {
           <Button onClick={() => updatePart('body')}>BODY</Button>
           <Button onClick={() => updatePart('arms')}>ARMS</Button>
           <Button onClick={() => updatePart('legs')}>LEGS</Button>
-        </ControlPanel>
-
-        <ControlPanel>
-          <Button onClick={cycleAccessories}>
-            {getAccessoryDescription()}
-          </Button>
+          <Button onClick={() => updatePart('accessory')}>ACCESSORY</Button>
         </ControlPanel>
 
         <ColorPicker
@@ -115,25 +136,36 @@ const App: FC = () => {
           onChange={(e) => setRobotParts(prev => ({ ...prev, color: e.target.value }))}
         />
 
+        <ControlPanel>
+          <Button onClick={saveCurrentConfig}>SAVE CONFIGURATION</Button>
+          <Button onClick={generateShareableLink}>SHARE CONFIGURATION</Button>
+          <Button onClick={captureRobotImage}>SAVE AS IMAGE</Button>
+        </ControlPanel>
+
+        {savedConfigs.length > 0 && (
+          <ControlPanel>
+            <h2>Saved Configurations</h2>
+            {savedConfigs.map((config, index) => (
+              <Button key={index} onClick={() => setRobotParts(config)}>
+                Load Config {index + 1}
+              </Button>
+            ))}
+          </ControlPanel>
+        )}
+
         <Button onClick={() => {
-          const randomPart = () => Math.floor(Math.random() * 5) + 1;
-          const randomAccessoryIndex = Math.floor(Math.random() * ACCESSORY_PRESETS.length);
-          setAccessoryIndex(randomAccessoryIndex);
+          const randomPart = () => Math.floor(Math.random() * 5);
           setRobotParts({
             head: randomPart(),
             body: randomPart(),
             arms: randomPart(),
             legs: randomPart(),
             color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
-            accessories: ACCESSORY_PRESETS[randomAccessoryIndex]
-          } as RobotParts);
+            accessory: -1
+          });
         }}>
           RANDOMIZE CONFIGURATION
         </Button>
-
-        <ModuleStatus>
-          {completedModules} / 7 MODULES COMPLETED
-        </ModuleStatus>
       </MainPanel>
     </Container>
   );

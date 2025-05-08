@@ -5,6 +5,7 @@ import RobotHead from './RobotHead';
 import RobotBody from './RobotBody';
 import RobotArms from './RobotArms';
 import RobotLegs from './RobotLegs';
+import RobotAccessories from './RobotAccessories';
 
 interface Robot3DProps {
   parts: {
@@ -13,11 +14,7 @@ interface Robot3DProps {
     body: number;
     arms: number;
     legs: number;
-    accessories?: {
-      hat?: 'cowboy' | 'bonnet' | false;
-      mustache?: boolean;
-      lipstick?: boolean;
-    };
+    accessory: number;
   };
 }
 
@@ -31,11 +28,12 @@ const Robot3D: FC<Robot3DProps> = ({ parts }) => {
       <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
       <pointLight position={[-10, -10, -10]} />
       
-      <group position={[0, 0, 0]}>
-        <RobotHead color={parts.color} style={parts.head} accessories={parts.accessories} />
+      <group position={[0, 1.5, 0]}>
+        <RobotHead color={parts.color} style={parts.head} />
         <RobotBody color={parts.color} style={parts.body} />
         <RobotArms color={parts.color} style={parts.arms} />
         <RobotLegs color={parts.color} style={parts.legs} />
+        <RobotAccessories color={parts.color} style={parts.accessory} />
       </group>
 
       <Grid
